@@ -1,0 +1,488 @@
+
+---
+title: "Estimating biodiversity loss from habitat loss using rcoalescence"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{rcoalescence-estimating-biodiversity-loss}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+bibliography: bibliography.bib  
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup, echo=FALSE}
+suppressPackageStartupMessages({
+  library(rcoalescence)
+  library(dplyr)
+  library(ggplot2)
+  library(tidyr)
+  library(tiff)
+  library(reshape2)
+  library(viridis)
+  library(ggpubr)
+})
+output_dir <- "output"
+figure_directory <- "figures"
+if (!dir.exists(figure_directory)) {
+  dir.create(figure_directory)
+}
+```
+
+# Background
+
+The goal of this vignette is to demonstrate the workflow for simulating a habitat loss scenario using rcoalescence and estimating biodiversity losses in different areas of the landscape. It is an extended version of the vignette found within the `rcoalescence` package itself, aimed at supporting Thompson *et al* (2020).
+
+We are interested in simulating the effect of habitat loss for a taxon. In our scenario, there is currently an area of land consisting of a protected national park and mixed forest and farmland in the surrounding area. We estimate that the protected national park supports approximately 10 individuals of our taxon per kilometer of complete forest and 0 - 5 individuals per kilometer in the surrounding area, depending on the forest coverage.
+
+We wish to model the scenario where a significant portion of the land is completed deforested, resulting in 0 individuals per kilometer in the given area. 
+
+For the purposes of this demo, maps were extracted and edited from Global Forest Watch [@Greenpeace]. In our model, each pixel on the maps represents one square kilometer.
+
+First we read the map files and count the number of individuals.
+
+```{r warning=FALSE}
+source_file <- file.path("images", "ifl_2016_pre.tif")
+source_file_post <- file.path("images", "ifl_2016_post.tif")
+source_national_park <- file.path("images", "ifl_national_park.tif")
+suppressWarnings({
+  pre_data <- readTIFF(source_file)
+})
+suppressWarnings({
+  post_data <- readTIFF(source_file_post)
+})
+suppressWarnings({
+  national_park_data <- readTIFF(source_national_park)
+})
+
+total_individuals_prior <- sum(floor(pre_data * 10))
+total_individuals_post <- sum(floor(post_data * 10))
+total_individuals_national_park <- sum(floor(national_park_data * 10))
+total_aspect_ratio <- nrow(pre_data)/ncol(pre_data)
+```
+
+## Requirements
+
+This vignette requires approximately 4GB of hard drive storage (for simulation outputs) and a reasonably modern processor with >4GB of RAM.
+
+## Key goals
+
+The modelling aims to answer the following questions:
+
+- How many species are expected to be lost from the habitat loss?
+- What is the spatial distribution of biodiversity (measured by average number of species per kilometer) before and after the habitat loss?
+
+In this vignette, we use the "present" to refer to the current landscape (represented at time $t = -100$ in the simulation) and use the "future" to refer to the future landscape after 100 generations have passed ($t=100$). Our current landscape contains a total of `r scales::number(total_individuals_prior)` whilst the future landscape contains a total of `r scales::number(total_individuals_post)`, a roughly 22% reduction. Of these, `r scales::number(total_individuals_national_park)` are contained within the national park itself.
+
+```{r echo=FALSE, warning=FALSE, fig.fullwidth=TRUE, fig.width=6, fig.cap="Landscape patterns for our model. Each pixel represents one squared kilometer. The national park is represented a within a subset of the landscape, mostly consisting of high quality habitat."}
+
+
+scenario_plot <- melt(pre_data) %>%
+  mutate(scenario = "Current landscape") %>%
+  bind_rows(melt(post_data) %>% mutate(scenario = "Future landscape")) %>%
+  bind_rows(melt(national_park_data) %>%
+    mutate(scenario = "National park") %>%
+    filter(value > 0)) %>%
+  ggplot() +
+  geom_raster(aes(x = Var2, y = Var1, fill = value * 10)) +
+  theme_void() +
+  scale_y_reverse() +
+  scale_fill_distiller("Individuals per km", palette = "YlGn", direction = 1) +
+  facet_grid(scenario~ .) +
+  theme(aspect.ratio = total_aspect_ratio, legend.position = "left")
+scenario_plot
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, error=FALSE}
+pdf(file.path(figure_directory, "habitat_loss_scenario_plot.pdf"), 7, 3)
+print(scenario_plot)
+invisible(dev.off())
+```
+
+# Running the simulation
+
+Running the simulation is split into three key steps. First, all the simulation parameters are set. Next, the simulation is run. Finally, the community is reconstructed and saved to an output database. At this point, biodiversity metrics can be calculated using the in-built functions or directly from the output database.
+
+
+These variables define some important simulation parameters. It is often useful to keep these parameters in one place. 
+
+
+```{r}
+# Sample every 5 generations over 110 generations
+times_list <- seq(0, 110, 5)
+min_speciation_rate <- 0.0001
+sigma <- 1
+# 100 generations between the map types
+# Set to 99.9 so that the map changes by the just before the 100th generation
+time_difference_between_maps <- 99.9
+```
+
+## Create the simulation objects
+
+We start by creating the new spatial simulation and defining the house-keeping variables. The `seed` defines the simulation's random number generation seed (for reproducing simulations) and the `task` and `output` variables control the location and name of the output database file. We also provide two key simulation parameters - the minimum speciation rate and the list of times for which we want to store the state of the simulation. For the purposes of this example, we also set `uses_logging=TRUE` so that the logs are visible to the user. We recommend using this parameter when first attempting a new simulation so that problems can be more easily debugged. The `times_list` defines the set of time points from which we will sample the simulation. For this exercise, we sample every 5 generations, starting 10 generations before the "present" and continuing 100 generations into the "future". 
+
+We create our new `SpatialTreeSimulation` object and set the simulation parameters. We then perform the simulation and apply speciation rates. We also extract the species locations, species richness and species abundances for the simulation. We repeat the above process ten times with different random number seeds.
+
+```{r warning=FALSE}
+species_locations <- NULL
+species_abundances <- NULL
+species_richness <- NULL
+pmt <- proc.time()
+for (seed in seq(1, 10))
+{
+  print(paste("Running simulation number", seed))
+  output_path <- file.path(output_dir, paste0("data_1_", seed, ".db"))
+  sim <- SpatialTreeSimulation$new()
+  if (file.exists(output_path)) {
+    sim$setOutputDatabase(output_path)
+  } else {
+    sim$setSimulationParameters(
+      task = 1,
+      seed = seed,
+      output_directory = output_dir,
+      min_speciation_rate = min_speciation_rate,
+      times_list = times_list,
+      uses_logging = FALSE,
+      fine_map_file = source_file_post,
+      deme = 10,
+      historical_fine_map = source_file,
+      gen_since_historical = time_difference_between_maps,
+      habitat_change_rate = 0.0,
+      sigma = sigma,
+      dispersal_method = "normal",
+      landscape_type = "tiled_fine"
+    )
+    sim$runSimulation()
+    sim$applySpeciationRates(
+      speciation_rates = c(min_speciation_rate),
+      times_list = times_list,
+      use_spatial = TRUE
+    )
+    sim$output()
+  }
+  all_references <- sim$getCommunityReferences()$reference
+  tmp_locations <- sim$getSpeciesLocations(all_references) %>%
+    mutate(seed = seed)
+  tmp_abundances <- sim$getSpeciesAbundances(all_references) %>%
+    mutate(seed = seed)
+  tmp_richnesses <- sim$getSpeciesRichness(all_references) %>%
+    mutate(seed = seed)
+  if (is.null(species_locations)) {
+    species_locations <- tmp_locations
+  } else {
+    species_locations <- species_locations %>%
+      bind_rows(tmp_locations)
+  }
+  if (is.null(species_abundances)) {
+    species_abundances <- tmp_abundances
+  } else {
+    species_abundances <- species_abundances %>%
+      bind_rows(tmp_abundances)
+  }
+  if (is.null(species_richness)) {
+    species_richness <- tmp_richnesses
+  } else {
+    species_richness <- species_richness %>%
+      bind_rows(tmp_richnesses)
+  }
+}
+proc.time() - pmt
+```
+```{r warning=FALSE, message=FALSE}
+species_richness <- species_richness %>%
+  full_join(sim$getCommunityReferences() %>%
+    rename(community_reference = reference),
+  by = "community_reference"
+  )
+```
+
+```{r, warning=FALSE, message=FALSE}
+mean_richness_before <- species_richness %>%
+  filter(time >= 100) %>%
+  select(species_richness) %>%
+  pull() %>%
+  mean()
+mean_richness_after <- species_richness %>%
+  filter(time < 100) %>%
+  select(species_richness) %>%
+  pull() %>%
+  mean()
+mean_species_richness <- species_richness %>%
+  select(community_reference, species_richness, speciation_rate, time, seed) %>%
+  group_by(community_reference, time) %>%
+  summarise(
+    mean_species_richness = mean(species_richness),
+    min_species_richness = min(species_richness),
+    max_species_richness = max(species_richness)
+  )
+knitr::kable(mean_species_richness %>%
+  rename(
+    `community reference` = community_reference,
+    `species richness` = mean_species_richness,
+  ))
+```
+
+### Species richness over time
+
+By adjusting the time variable to be in number of generations from present, instead of number of generations prior to the end point, we get a more meaningful interpretation of species richness over time. We can see that species richness declines after the habitat is lost (which occurs at $t=0$ on the below graph), losing approximately `r scales::number(100 - 100 * mean_richness_after/mean_richness_before)`% of species within a few generations. Our simulation has `r round(mean_richness_before)` species on average for the current landscape shape, and `r round(mean_richness_after)` species on average for the future landscape shape. Note that in this scenario, the high speciation rate means that the relaxation to the new equilibrium state occurs very quickly. For lower speciation rates, this process is likely to occur much more slowly. It is also interesting that the proportional species loss is actually higher than the proportional habitat loss, indicating the biodiversity value of larger areas of poorer quality habitat.
+
+```{r, fig.fullwidth=TRUE, fig.width=6, fig.cap="Simulated species richness in the landscape as a function of time."}
+species_richness_plot <- mean_species_richness %>% ggplot() +
+  geom_ribbon(aes(x = 100 - time, ymin = min_species_richness, ymax = max_species_richness), alpha = 0.6) +
+  geom_line(aes(
+    x = 100 - time,
+    y = mean_species_richness
+  )) +
+  theme_classic() +
+  scale_x_continuous("Time from present (generations)") +
+  scale_y_continuous("Total species richness", limits = c(0, NA)) +
+  geom_vline(aes(xintercept = 0), colour = "darkred", linetype = "dashed")
+species_richness_plot
+```
+
+## Species abundance distributions over time
+
+We can also extract the abundance of each species at each point in time and use this to plot a species abundance distribution.
+
+```{r }
+mean_species_abundances <- species_abundances %>%
+  full_join(sim$getCommunityReferences() %>%
+    rename(community_reference = reference),
+  by = "community_reference"
+  ) %>%
+  filter(no_individuals > 0) %>%
+  mutate(log_abundance = floor(log2(no_individuals))) %>%
+  group_by(log_abundance, community_reference, time, seed) %>%
+  summarise(total_species = n()) %>%
+  ungroup() %>%
+  group_by(time, log_abundance) %>%
+  summarise(
+    mean_species = mean(total_species),
+    max_species = max(total_species),
+    min_species = min(total_species)
+  )
+```
+
+```{r warning=FALSE, message=FALSE, fig.fullwidth=TRUE, fig.width=6, fig.cap="Species abundance distributions (Preston plots) for the current and future landscapes."}
+sad_plot <- mean_species_abundances %>%
+  filter(time == 0 | time == 100) %>%
+  mutate(scenario = ifelse(time == 0, "Future landscape", "Current landscape")) %>%
+  ggplot() +
+  geom_ribbon(aes(x = log_abundance, ymin = min_species, ymax = max_species), alpha = 0.5) +
+  geom_line(aes(x = log_abundance, y = mean_species)) +
+  facet_grid(. ~ scenario) +
+  scale_x_continuous(expression(paste("Abundance class (", log[2], ")")),
+    trans = scales::log2_trans(),
+    breaks = scales::trans_breaks("log2", function(x) 2^x, n = 6),
+    labels = scales::trans_format("log2", scales::math_format(.x))
+  ) +
+  scale_y_continuous("Number of species") +
+  theme_classic()
+sad_plot
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, error=FALSE}
+pdf(file.path(figure_directory, "species_abundances_time.pdf"), 6, 3)
+print(sad_plot)
+invisible(dev.off())
+```
+## Spatial distribution of species richness
+
+We can also investigate the impact of the habitat loss on localised species richness in different areas of the landscape. At first glance, it appears that the effects of the habitat loss in the model do not impact considerably outside of the deforested region, as species richness remains similar within cells. Generally, areas towards the centre of the high-density protected area have considerably higher species richness than the surrounding area.
+
+```{r warning=FALSE, fig.fullwidth=TRUE, fig.width=6, fig.cap="Localised species richness in the current and future landscapes."}
+# Community reference 1 corresponds to the t = 0
+mean_species_density <- species_locations %>%
+  filter(community_reference %in% c(1, 21)) %>%
+  group_by(x, y, seed, community_reference) %>%
+  summarise(total_species = length(unique(species_id))) %>%
+  group_by(x, y, community_reference) %>%
+  summarise(
+    mean_species_density = mean(total_species),
+    min_species_density = min(total_species),
+    max_species_density = max(total_species)
+  ) %>%
+  inner_join(sim$getCommunityReferences() %>%
+    rename(community_reference = reference),
+  by = "community_reference"
+  ) %>%
+  mutate(scenario = ifelse(time == 0,
+    "Future landscape",
+    "Current landscape"
+  ))
+```
+
+```{r}
+species_density_plot <- mean_species_density %>%
+  ggplot() +
+  geom_raster(aes(x = x, y = y, fill = mean_species_density)) +
+  scale_fill_viridis("Mean species richness") +
+  theme_void() +
+  theme(aspect.ratio = total_aspect_ratio) +
+  scale_y_reverse() +
+  facet_grid(. ~ scenario)
+species_density_plot
+```
+
+# Biodiversity impact within the national park
+
+The final question we want to answer is the biodiversity impact within the national park itself. To determine the biodiversity within a subset of the landscape there are two approaches we can use; either we supply a `sample_file` to the `applySpeciationRates()` function, which restricts sampling to certain areas of the landscape, or we simply subset from the species locations within R. As we have already extracted the species locations, we shall use the latter approach.
+
+```{r}
+# Find the locations within the national park
+national_park_locations <- melt(national_park_data) %>%
+  rename(x = Var2, y = Var1) %>%
+  filter(value > 0.0) %>%
+  distinct(x, y)
+# Fetch the individuals within national park
+# for the current and future landscape
+national_park_individuals <- species_locations %>%
+  filter(community_reference %in% c(1, 21)) %>%
+  inner_join(national_park_locations, by = c("x", "y"))
+national_park_species_density <- national_park_individuals %>%
+  group_by(seed, x, y, community_reference) %>%
+  summarise(species_richness = length(unique(species_id))) %>%
+  group_by(x, y, community_reference) %>%
+  summarise(
+    mean_species_richness = mean(species_richness),
+    min_species_richness = min(species_richness),
+    max_species_richness = max(species_richness)
+  ) %>%
+  full_join(sim$getCommunityReferences() %>%
+    rename(community_reference = reference),
+  by = "community_reference"
+  ) %>%
+  mutate(scenario = ifelse(time == 0,
+    "Future landscape",
+    "Current landscape"
+  ))
+```
+
+
+
+```{r echo=FALSE}
+# Calculate the number of species
+mean_national_park_richness <- national_park_individuals %>%
+  group_by(community_reference, seed) %>%
+  summarise(species_richness = length(unique(species_id))) %>%
+  group_by(community_reference) %>%
+  summarise(
+    mean_species_richness = mean(species_richness),
+    min_species_richness = min(species_richness),
+    max_species_richness = max(species_richness)
+  ) %>%
+  inner_join(sim$getCommunityReferences() %>%
+    rename(community_reference = reference),
+  by = "community_reference"
+  )
+
+knitr::kable(
+  mean_national_park_richness %>%
+
+    mutate(scenario = ifelse(time == 0,
+      "Future landscape",
+      "Current landscape"
+    )) %>%
+    select(scenario, min_species_richness, mean_species_richness, max_species_richness) %>%
+    rename(
+      `mean species richness` = mean_species_richness,
+      `min species richness` = min_species_richness,
+      `max species richness` = max_species_richness,
+    ),
+  label = "Species numbers within the national park under the current and future scenarios."
+)
+```
+
+We can see that the total number of species decreases only slightly in the model, despite the loss of habitat outside the park. Looking at the spatial distribution, the same picture emerges, except for one area along the southeast edge of the park that appears to have a significant decrease in species richness. If this were a pattern that we were interested in, we could repeat the simulation with many different random number seeds (using the `seed` parameter) to determine if this effect is present across simulation runs.
+
+
+```{r fig.fullwidth=TRUE, fig.width=6, fig.cap="Species richness change within the national park for the current and future landscapes."}
+species_loss_gain <- national_park_species_density %>%
+  select(x, y, scenario, mean_species_richness) %>%
+  distinct() %>%
+  pivot_wider(
+    id_cols = c(x, y),
+    names_from = scenario,
+    values_from = mean_species_richness
+  ) %>%
+  mutate(
+    `Future landscape` = replace_na(`Future landscape`, 0),
+    difference = `Future landscape` - `Current landscape`,
+    loss_gain = ifelse(replace_na(difference < 0, FALSE),
+      "Species lost\n",
+      ifelse(replace_na(difference > 0, FALSE),
+        "Species gained\n",
+        "No change\n"
+      )
+    )
+  ) %>%
+  filter(loss_gain != "No change\n")
+national_park_loss_gain_plot <- species_loss_gain %>%
+  ggplot() +
+  geom_raster(aes(x = x, y = y, fill = difference)) +
+  scale_fill_distiller("Species\nrichness\nloss/gain",
+    palette = "Spectral",
+    direction = 1,
+    limits = c(-1, 1) * 0.7 * max(abs(national_park_species_density$mean_species_richness), na.rm = TRUE)
+  ) +
+  theme_void() +
+  scale_y_reverse() +
+  theme(aspect.ratio = 103/189) +
+  facet_grid(. ~ loss_gain)
+national_park_loss_gain_plot
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, error=FALSE}
+pdf(file.path(figure_directory, "national_park_loss_gain.pdf"), 7, 3)
+print(national_park_loss_gain_plot)
+invisible(dev.off())
+```
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+column_1 <- ggarrange(scenario_plot,
+                      sad_plot + theme(aspect.ratio = 0.7),
+  
+  labels = c(
+    "a) Landscape structure",
+    "b) Species abundance distributions for the landscapes"
+    
+  ), ncol=1,
+  hjust = 0,
+  vjust = 1,
+  font.label = list(size = 12, face = "bold")
+)
+column_2 <- ggarrange(
+  species_richness_plot + theme(aspect.ratio = 0.5),
+  species_density_plot,
+  national_park_loss_gain_plot,
+  
+  labels = c(
+    "c) Mean species richness over time",
+    "d) Mean species richness over space",
+    "e) Species richness loss/gain within the national park"
+  ),
+  ncol=1,
+  hjust = 0,
+  vjust = 1,
+  font.label = list(size = 12, face = "bold")
+)
+
+pdf(file = file.path(figure_directory, "combined_plot.pdf"), 12, 7)
+print(ggarrange(column_1, column_2, ncol = 2))
+invisible(dev.off())
+```
+
+# Conclusions
+
+From this modelling demonstration, we can conclude that we should expect to lose approximately `scales::number(100 - 100 * mean_richness_after/mean_richness_before)`% of the species shortly following the habitat loss. The species are mostly lost in the deforested areas and biodiversity in the remaining landscape remains high. Within the national park, species richness remains broadly similar to the levels prior to the deforestation. However, the process outlined here represents the first step in a modelling study. The next steps would generally be an exploration of parameter space; how do our conclusions change when parameters such as speciation rate and dispersal change? Furthermore, a deeper investigation into other biodiversity metrics, such as species area curves and beta diversity may be required if the scientist wishes to explore these patterns. Speciation rates can be applied post-simulation (a topic not covered here), but for different dispersals, new simulations must be run. Often it is useful to parrellise these models on a high-performance computing cluster, particularly as simulation times quickly explodes as speciation rate drops and the size of the landscape increases.
+
+## Modifications to the scenario
+
+Using the same process outlined above, any other landscape scenarios can be modelled. For example, what if the a much larger area outside is lost, but a habitat corridor is kept? If the reverse is true (i.e. habitat is reclaimed), how quickly does biodiversity recover? By changing the map files and the times they apply to, these scenarios can be modelled in the same way.
+
+# Bibliography
