@@ -127,7 +127,7 @@ time_difference_between_maps <- 99.9
 
 ## Create the simulation objects
 
-We start by creating the new spatial simulation and defining the house-keeping variables. The `seed` defines the simulation's random number generation seed (for reproducing simulations) and the `task` and `output` variables control the location and name of the output database file. We also provide two key simulation parameters - the minimum speciation rate and the list of times for which we want to store the state of the simulation. For the purposes of this example, we also set `uses_logging=TRUE` so that the logs are visible to the user. We recommend using this parameter when first attempting a new simulation so that problems can be more easily debugged. The `times_list` defines the set of time points from which we will sample the simulation. For this exercise, we sample every 5 generations, starting 10 generations before the "present" and continuing 100 generations into the "future". 
+We start by creating the new spatial simulation and defining the house-keeping variables. The `seed` defines the simulation's random number generation seed (for reproducing simulations) and the `task` and `output` variables control the location and name of the output database file. We also provide two key simulation parameters - the minimum speciation rate and the list of times for which we want to store the state of the simulation. A useful parameter is `uses_logging=TRUE`, which enables printing of extra information. We recommend using this parameter when first attempting a new simulation so that problems can be more easily debugged. The `times_list` defines the set of time points from which we will sample the simulation. For this exercise, we sample every 5 generations, starting 10 generations before the "present" and continuing 100 generations into the "future". 
 
 We create our new `SpatialTreeSimulation` object and set the simulation parameters. We then perform the simulation and apply speciation rates. We also extract the species locations, species richness and species abundances for the simulation. We repeat the above process ten times with different random number seeds.
 
@@ -289,7 +289,8 @@ sad_plot <- mean_species_abundances %>%
     labels = scales::trans_format("log2", scales::math_format(.x))
   ) +
   scale_y_continuous("Number of species") +
-  theme_classic()
+  theme_classic() + 
+  theme(aspect.ratio=0.7)
 sad_plot
 ```
 
