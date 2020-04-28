@@ -1,7 +1,10 @@
-
 ---
 title: "Estimating biodiversity loss from habitat loss using rcoalescence"
-output: rmarkdown::html_vignette
+output: 
+  pdf_document: 
+    keep_tex: yes
+  rmarkdown::html_vignette:
+    code_folding: show
 vignette: >
   %\VignetteIndexEntry{rcoalescence-estimating-biodiversity-loss}
   %\VignetteEngine{knitr::rmarkdown}
@@ -63,7 +66,7 @@ suppressWarnings({
 total_individuals_prior <- sum(floor(pre_data * 10))
 total_individuals_post <- sum(floor(post_data * 10))
 total_individuals_national_park <- sum(floor(national_park_data * 10))
-total_aspect_ratio <- nrow(pre_data)/ncol(pre_data)
+total_aspect_ratio <- nrow(pre_data) / ncol(pre_data)
 ```
 
 ## Requirements
@@ -93,7 +96,7 @@ scenario_plot <- melt(pre_data) %>%
   theme_void() +
   scale_y_reverse() +
   scale_fill_distiller("Individuals per km", palette = "YlGn", direction = 1) +
-  facet_grid(scenario~ .) +
+  facet_grid(scenario ~ .) +
   theme(aspect.ratio = total_aspect_ratio, legend.position = "left")
 scenario_plot
 ```
@@ -132,7 +135,6 @@ We create our new `SpatialTreeSimulation` object and set the simulation paramete
 species_locations <- NULL
 species_abundances <- NULL
 species_richness <- NULL
-pmt <- proc.time()
 for (seed in seq(1, 10))
 {
   print(paste("Running simulation number", seed))
@@ -191,8 +193,8 @@ for (seed in seq(1, 10))
       bind_rows(tmp_richnesses)
   }
 }
-proc.time() - pmt
 ```
+
 ```{r warning=FALSE, message=FALSE}
 species_richness <- species_richness %>%
   full_join(sim$getCommunityReferences() %>%
@@ -201,7 +203,7 @@ species_richness <- species_richness %>%
   )
 ```
 
-```{r, warning=FALSE, message=FALSE}
+```{r echo=FALSE, warning=FALSE, message=FALSE}
 mean_richness_before <- species_richness %>%
   filter(time >= 100) %>%
   select(species_richness) %>%
@@ -220,20 +222,21 @@ mean_species_richness <- species_richness %>%
     min_species_richness = min(species_richness),
     max_species_richness = max(species_richness)
   )
-knitr::kable(mean_species_richness %>%
-  rename(
-    `community reference` = community_reference,
-    `species richness` = mean_species_richness,
-  ))
 ```
 
 ### Species richness over time
 
 By adjusting the time variable to be in number of generations from present, instead of number of generations prior to the end point, we get a more meaningful interpretation of species richness over time. We can see that species richness declines after the habitat is lost (which occurs at $t=0$ on the below graph), losing approximately `r scales::number(100 - 100 * mean_richness_after/mean_richness_before)`% of species within a few generations. Our simulation has `r round(mean_richness_before)` species on average for the current landscape shape, and `r round(mean_richness_after)` species on average for the future landscape shape. Note that in this scenario, the high speciation rate means that the relaxation to the new equilibrium state occurs very quickly. For lower speciation rates, this process is likely to occur much more slowly. It is also interesting that the proportional species loss is actually higher than the proportional habitat loss, indicating the biodiversity value of larger areas of poorer quality habitat.
 
-```{r, fig.fullwidth=TRUE, fig.width=6, fig.cap="Simulated species richness in the landscape as a function of time."}
+```{r echo=FALSE, fig.fullwidth=TRUE, fig.width=6, fig.cap="Simulated species richness in the landscape as a function of time."}
 species_richness_plot <- mean_species_richness %>% ggplot() +
-  geom_ribbon(aes(x = 100 - time, ymin = min_species_richness, ymax = max_species_richness), alpha = 0.6) +
+  geom_ribbon(aes(
+    x = 100 - time,
+    ymin = min_species_richness,
+    ymax = max_species_richness
+  ),
+  alpha = 0.6
+  ) +
   geom_line(aes(
     x = 100 - time,
     y = mean_species_richness
@@ -268,12 +271,16 @@ mean_species_abundances <- species_abundances %>%
   )
 ```
 
-```{r warning=FALSE, message=FALSE, fig.fullwidth=TRUE, fig.width=6, fig.cap="Species abundance distributions (Preston plots) for the current and future landscapes."}
+```{r echo=FALSE, warning=FALSE, message=FALSE, fig.fullwidth=TRUE, fig.width=6, fig.cap="Species abundance distributions (Preston plots) for the current and future landscapes."}
 sad_plot <- mean_species_abundances %>%
   filter(time == 0 | time == 100) %>%
   mutate(scenario = ifelse(time == 0, "Future landscape", "Current landscape")) %>%
   ggplot() +
-  geom_ribbon(aes(x = log_abundance, ymin = min_species, ymax = max_species), alpha = 0.5) +
+  geom_ribbon(aes(
+    x = log_abundance,
+    ymin = min_species,
+    ymax = max_species
+  ), alpha = 0.5) +
   geom_line(aes(x = log_abundance, y = mean_species)) +
   facet_grid(. ~ scenario) +
   scale_x_continuous(expression(paste("Abundance class (", log[2], ")")),
@@ -317,11 +324,11 @@ mean_species_density <- species_locations %>%
   ))
 ```
 
-```{r}
+```{r echo=FALSE}
 species_density_plot <- mean_species_density %>%
   ggplot() +
   geom_raster(aes(x = x, y = y, fill = mean_species_density)) +
-  scale_fill_viridis("Mean species richness") +
+  scale_fill_viridis("Mean\nspecies\nrichness") +
   theme_void() +
   theme(aspect.ratio = total_aspect_ratio) +
   scale_y_reverse() +
@@ -393,15 +400,16 @@ knitr::kable(
       `mean species richness` = mean_species_richness,
       `min species richness` = min_species_richness,
       `max species richness` = max_species_richness,
-    ),
-  label = "Species numbers within the national park under the current and future scenarios."
+    ) %>% 
+    arrange(scenario),
+  caption = "Species numbers within the national park under the current and future scenarios."
 )
 ```
 
 We can see that the total number of species decreases only slightly in the model, despite the loss of habitat outside the park. Looking at the spatial distribution, the same picture emerges, except for one area along the southeast edge of the park that appears to have a significant decrease in species richness. If this were a pattern that we were interested in, we could repeat the simulation with many different random number seeds (using the `seed` parameter) to determine if this effect is present across simulation runs.
 
 
-```{r fig.fullwidth=TRUE, fig.width=6, fig.cap="Species richness change within the national park for the current and future landscapes."}
+```{r echo=FALSE, fig.fullwidth=TRUE, fig.width=6, fig.cap="Species richness change within the national park for the current and future landscapes."}
 species_loss_gain <- national_park_species_density %>%
   select(x, y, scenario, mean_species_richness) %>%
   distinct() %>%
@@ -422,17 +430,23 @@ species_loss_gain <- national_park_species_density %>%
     )
   ) %>%
   filter(loss_gain != "No change\n")
+plot_max_value <- 0.4 * max(abs(national_park_species_density$mean_species_richness),
+  na.rm = TRUE
+)
 national_park_loss_gain_plot <- species_loss_gain %>%
+  filter(!is.na(difference)) %>%
+  mutate(difference = max(min(plot_max_value, difference), -plot_max_value)) %>%
   ggplot() +
+  geom_raster(data = national_park_locations, aes(x = x, y = y), fill = "grey20", alpha = 0.6) +
   geom_raster(aes(x = x, y = y, fill = difference)) +
   scale_fill_distiller("Species\nrichness\nloss/gain",
     palette = "Spectral",
     direction = 1,
-    limits = c(-1, 1) * 0.7 * max(abs(national_park_species_density$mean_species_richness), na.rm = TRUE)
+    limits = c(-1, 1) * plot_max_value
   ) +
   theme_void() +
   scale_y_reverse() +
-  theme(aspect.ratio = 103/189) +
+  theme(aspect.ratio = 103 / 189) +
   facet_grid(. ~ loss_gain)
 national_park_loss_gain_plot
 ```
@@ -445,13 +459,11 @@ invisible(dev.off())
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 column_1 <- ggarrange(scenario_plot,
-                      sad_plot + theme(aspect.ratio = 0.7),
-  
+  sad_plot + theme(aspect.ratio = 0.7),
   labels = c(
     "a) Landscape structure",
     "b) Species abundance distributions for the landscapes"
-    
-  ), ncol=1,
+  ), ncol = 1,
   hjust = 0,
   vjust = 1,
   font.label = list(size = 12, face = "bold")
@@ -460,13 +472,12 @@ column_2 <- ggarrange(
   species_richness_plot + theme(aspect.ratio = 0.5),
   species_density_plot,
   national_park_loss_gain_plot,
-  
   labels = c(
-    "c) Mean species richness over time",
+    "c) Species richness over time",
     "d) Mean species richness over space",
     "e) Species richness loss/gain within the national park"
   ),
-  ncol=1,
+  ncol = 1,
   hjust = 0,
   vjust = 1,
   font.label = list(size = 12, face = "bold")
@@ -479,7 +490,7 @@ invisible(dev.off())
 
 # Conclusions
 
-From this modelling demonstration, we can conclude that we should expect to lose approximately `scales::number(100 - 100 * mean_richness_after/mean_richness_before)`% of the species shortly following the habitat loss. The species are mostly lost in the deforested areas and biodiversity in the remaining landscape remains high. Within the national park, species richness remains broadly similar to the levels prior to the deforestation. However, the process outlined here represents the first step in a modelling study. The next steps would generally be an exploration of parameter space; how do our conclusions change when parameters such as speciation rate and dispersal change? Furthermore, a deeper investigation into other biodiversity metrics, such as species area curves and beta diversity may be required if the scientist wishes to explore these patterns. Speciation rates can be applied post-simulation (a topic not covered here), but for different dispersals, new simulations must be run. Often it is useful to parrellise these models on a high-performance computing cluster, particularly as simulation times quickly explodes as speciation rate drops and the size of the landscape increases.
+From this modelling demonstration, we can conclude that we should expect to lose approximately `r scales::number(100 - 100 * mean_richness_after/mean_richness_before)`% of the species shortly following the habitat loss. The species are mostly lost in the deforested areas and biodiversity in the remaining landscape remains high. Within the national park, species richness remains broadly similar to the levels prior to the deforestation. However, the process outlined here represents the first step in a modelling study. The next steps would generally be an exploration of parameter space; how do our conclusions change when parameters such as speciation rate and dispersal change? Furthermore, a deeper investigation into other biodiversity metrics, such as species area curves and beta diversity may be required if the scientist wishes to explore these patterns. Speciation rates can be applied post-simulation (a topic not covered here), but for different dispersals, new simulations must be run. Often it is useful to parrellise these models on a high-performance computing cluster, particularly as simulation times quickly explodes as speciation rate drops and the size of the landscape increases.
 
 ## Modifications to the scenario
 

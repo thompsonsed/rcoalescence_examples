@@ -3,5 +3,7 @@
 *.Rhistory
 *.RData
 *.Ruserdata
+*.tex
+*.pdf
 output
 figures
