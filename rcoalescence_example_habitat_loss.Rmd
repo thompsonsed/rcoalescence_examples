@@ -39,7 +39,7 @@ if (!dir.exists(figure_directory)) {
 
 # Background
 
-The goal of this vignette is to demonstrate the workflow for simulating a habitat loss scenario using rcoalescence and estimating biodiversity losses in different areas of the landscape. It is an extended version of the vignette found within the `rcoalescence` package itself, aimed at supporting Thompson *et al* (2020).
+The goal of this vignette is to demonstrate the workflow for simulating a habitat loss scenario using rcoalescence and estimating biodiversity losses in different areas of the landscape. It is an extended version of the vignette found within the `rcoalescence` package itself.
 
 We are interested in simulating the effect of habitat loss for a taxon. In our scenario, there is currently an area of land consisting of a protected national park and mixed forest and farmland in the surrounding area. We estimate that the protected national park supports approximately 10 individuals of our taxon per kilometer of complete forest and 0 - 5 individuals per kilometer in the surrounding area, depending on the forest coverage.
 
