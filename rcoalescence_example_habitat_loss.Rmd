@@ -429,8 +429,8 @@ species_loss_gain <- national_park_species_density %>%
         "No change\n"
       )
     )
-  ) %>%
-  filter(loss_gain != "No change\n")
+  ) #%>%
+  # filter(loss_gain != "No change\n")
 plot_max_value <- 0.4 * max(abs(national_park_species_density$mean_species_richness),
   na.rm = TRUE
 )
@@ -438,7 +438,7 @@ national_park_loss_gain_plot <- species_loss_gain %>%
   filter(!is.na(difference)) %>%
   mutate(difference = max(min(plot_max_value, difference), -plot_max_value)) %>%
   ggplot() +
-  geom_raster(data = national_park_locations, aes(x = x, y = y), fill = "grey20", alpha = 0.6) +
+  # geom_raster(data = national_park_locations, aes(x = x, y = y), fill = "grey20", alpha = 0.6) +
   geom_raster(aes(x = x, y = y, fill = difference)) +
   scale_fill_distiller("Species\nrichness\nloss/gain",
     palette = "Spectral",
@@ -447,8 +447,8 @@ national_park_loss_gain_plot <- species_loss_gain %>%
   ) +
   theme_void() +
   scale_y_reverse() +
-  theme(aspect.ratio = 103 / 189) +
-  facet_grid(. ~ loss_gain)
+  theme(aspect.ratio = 103 / 189)
+  # facet_grid(. ~ loss_gain)
 national_park_loss_gain_plot
 ```
 

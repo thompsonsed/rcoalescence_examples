@@ -301,7 +301,7 @@ island_richness_graph <- island_species_abundances %>%
     legend.key = element_blank(),
     aspect.ratio = 1.0
   ) +
-  scale_colour_viridis("Species richness", option = "inferno", begin = 0.4, end = 0.9) +
+  scale_colour_viridis("Species\nrichness", option = "inferno", begin = 0.4, end = 0.9) +
   scale_alpha_continuous(guide = FALSE) +
   scale_size_area(max_size = 30, guide = FALSE) +
   geom_point(aes(x = x, y = y, colour = species_richness, size = no_individuals)) +
@@ -381,7 +381,7 @@ island_endemics_graph <- island_endemics %>%
     legend.key = element_blank(),
     aspect.ratio = 1.0
   ) +
-  scale_colour_viridis("", option = "viridis", begin = 0.4, end = 0.9) +
+  scale_colour_viridis("Endemic\nrichness", option = "viridis", begin = 0.4, end = 0.9) +
   scale_alpha_continuous(guide = FALSE) +
   scale_size_area(max_size = 30, guide = FALSE) +
   geom_point(aes(x = x, y = y, colour = total_endemics, size = no_individuals)) +
