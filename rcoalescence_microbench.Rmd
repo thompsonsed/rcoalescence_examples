@@ -48,7 +48,7 @@ The microbenchmark code is provided at https://github.com/thompsonsed/pycoalesce
 
 
 
-```{r echo=FALSE, warning=FALSE, fig.fullwidth=TRUE, fig.width=6, fig.cap="Mean simulation time (averaged over 4 repeats) as a function of the landscape size. Colours represent the per-capita speciation rate. Different facets indicate the relative scale of the surrounding landscape within which individuals can move, before a hard boundary is hit."}
+```{r echo=FALSE, warning=FALSE, fig.fullwidth=TRUE, fig.width=6, fig.height=3, fig.cap="Mean simulation time (averaged over 4 repeats) as a function of the landscape size. Colours represent the per-capita speciation rate. Different facets indicate the relative scale of the surrounding landscape within which individuals can move, before a hard boundary is hit."}
 
 microbench_df <- read.csv(file.path(output_dir, "microbenchmarks.csv")) %>% 
   mutate(scale=as.character(scale)) %>% 
@@ -83,7 +83,7 @@ microbench_df %>%
   scale_fill_viridis("Speciation rate", trans="log10",  option="plasma")
 ```
 
-```{r echo=FALSE, warning=FALSE, fig.fullwidth=TRUE, fig.width=6, fig.cap="Mean simulation time (averaged over 4 repeats) as a function of per-capita speciation rate. Colours represent the size of the landscape in number of individuals. Different facets indicate the relative scale of the surrounding landscape within which individuals can move, before a hard boundary is hit."}
+```{r echo=FALSE, warning=FALSE, fig.fullwidth=TRUE, fig.width=6, fig.height=3, fig.cap="Mean simulation time (averaged over 4 repeats) as a function of per-capita speciation rate. Colours represent the size of the landscape in number of individuals. Different facets indicate the relative scale of the surrounding landscape within which individuals can move, before a hard boundary is hit."}
 microbench_df %>% 
   filter(sigma==2) %>% 
   group_by(size, scale, speciation_rate, sigma) %>%
@@ -109,18 +109,18 @@ microbench_df %>%
   scale_fill_viridis("Size", option="magma", trans="log2", end=0.9)
 ```
 
-```{r}
-kable(microbench_df %>% 
-        filter(scale=="Infinite") %>% 
-  group_by(size, scale, speciation_rate, sigma) %>%
-  summarise(`min time` = min(time),
-            `mean time` = mean(time),
-            `max time` = max(time)) %>% 
-  rename(`speciation rate`=speciation_rate)) %>% 
-  kable_styling()
+```{r echo=FALSE}
+# kable(microbench_df %>% 
+#         filter(scale=="Infinite") %>% 
+#   group_by(size, scale, speciation_rate, sigma) %>%
+#   summarise(`min time` = min(time),
+#             `mean time` = mean(time),
+#             `max time` = max(time)) %>% 
+#   rename(`speciation rate`=speciation_rate)) %>% 
+#   kable_styling()
 ```
 
-```{r}
+```{r echo=FALSE, warning=FALSE, fig.fullwidth=TRUE, fig.width=6, fig.height=3, fig.cap="Mean simulation time (averaged over 4 repeats) as a function of dispersal rate (sigma) on infinite landscapes. Colours represent the per-capita speciation rate. Different facets indicate the number of individuals in the sampled landscape."}
 microbench_df %>%
   filter(scale == "Infinite") %>% 
   group_by(size, scale, speciation_rate, sigma) %>% 
@@ -130,6 +130,7 @@ microbench_df %>%
             ) %>% 
   ungroup() %>% 
   mutate(size=size^2) %>% 
+  filter(size < 5000) %>% 
             ggplot()  +
   geom_ribbon(aes(x=sigma, 
                   ymin=min_time, 
