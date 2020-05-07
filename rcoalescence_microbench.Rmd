@@ -1,0 +1,146 @@
+---
+title: "Micro-benchmarks for rcoalescence"
+output: 
+  pdf_document: 
+    keep_tex: yes
+  rmarkdown::html_vignette:
+    code_folding: show
+vignette: >
+  %\VignetteIndexEntry{rcoalescence-estimating-biodiversity-loss}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+bibliography: bibliography.bib  
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup, echo=FALSE}
+suppressPackageStartupMessages({
+  library(rcoalescence)
+  library(dplyr)
+  library(ggplot2)
+  library(tidyr)
+  library(tiff)
+  library(reshape2)
+  library(viridis)
+  library(ggpubr)
+  library(kableExtra)
+})
+output_dir <- file.path("output", "bench")
+figure_directory <- "figures"
+if (!dir.exists(figure_directory)) {
+  dir.create(figure_directory)
+}
+temp_dir <- "temp"
+if(dir.exists(temp_dir))
+{
+  unlink(temp_dir, recursive=TRUE)
+}
+dir.create(temp_dir)
+```
+
+The microbenchmark code is provided at https://github.com/thompsonsed/pycoalescence_bench. The graphs below show simulation time against a number of different simulation parameters.
+
+
+
+```{r echo=FALSE, warning=FALSE, fig.fullwidth=TRUE, fig.width=6, fig.cap="Mean simulation time (averaged over 4 repeats) as a function of the landscape size. Colours represent the per-capita speciation rate. Different facets indicate the relative scale of the surrounding landscape within which individuals can move, before a hard boundary is hit."}
+
+microbench_df <- read.csv(file.path(output_dir, "microbenchmarks.csv")) %>% 
+  mutate(scale=as.character(scale)) %>% 
+  bind_rows(read.csv(file.path(output_dir, "microbenchmarks.csv")) %>% 
+              mutate(scale="infinite")) %>% 
+  mutate(scale=factor(ifelse(scale=="infinite", "Infinite", 
+                             paste0(scale, "x scale")), 
+                      levels=c("3x scale", "9x scale", "25x scale", "Infinite")))
+microbench_df %>% 
+  filter(sigma==2) %>% 
+  group_by(size, 
+           scale, 
+           speciation_rate, 
+           sigma) %>%
+  summarise(min_time = min(time),
+            max_time = max(time),
+            mean_time = mean(time),
+            ) %>% 
+  ggplot() + 
+  geom_ribbon(aes(x=size^2, 
+                  ymin=min_time, 
+                  ymax=max_time, fill=speciation_rate, group=speciation_rate), alpha=0.5) + 
+  geom_line(aes(x=size^2, y=mean_time, 
+                colour=speciation_rate, 
+                group=speciation_rate))+
+    theme_classic() + 
+  facet_grid(.~scale) + 
+  scale_x_continuous("Size of landscape (number of individuals)", 
+                     trans="log2")+
+  scale_y_continuous("Mean simulation time (seconds)", trans="log2")+
+  scale_colour_viridis("Speciation rate", trans="log10", option="plasma")+
+  scale_fill_viridis("Speciation rate", trans="log10",  option="plasma")
+```
+
+```{r echo=FALSE, warning=FALSE, fig.fullwidth=TRUE, fig.width=6, fig.cap="Mean simulation time (averaged over 4 repeats) as a function of per-capita speciation rate. Colours represent the size of the landscape in number of individuals. Different facets indicate the relative scale of the surrounding landscape within which individuals can move, before a hard boundary is hit."}
+microbench_df %>% 
+  filter(sigma==2) %>% 
+  group_by(size, scale, speciation_rate, sigma) %>%
+  summarise(min_time = min(time),
+            max_time = max(time),
+            mean_time = mean(time),
+            ) %>% 
+  ungroup() %>% 
+  mutate(size=size^2) %>% 
+            ggplot()  +
+  geom_ribbon(aes(x=speciation_rate, ymin=min_time, ymax=max_time, fill=size, group=size), alpha=0.5)+
+  
+          geom_line(aes(x=speciation_rate, 
+                          y=mean_time, 
+                          colour=size, 
+                          # linetype=as.factor(scale),
+                          group=size)) + 
+            scale_x_log10("Speciation rate") + 
+            scale_y_continuous("Mean simulation time (seconds)", trans="log2") + 
+  theme_classic() + 
+  facet_grid(.~scale)+
+  scale_colour_viridis("Size", option="magma", trans="log2", end=0.9) + 
+  scale_fill_viridis("Size", option="magma", trans="log2", end=0.9)
+```
+
+```{r}
+kable(microbench_df %>% 
+  group_by(size, scale, speciation_rate, sigma) %>%
+  summarise(`min time` = min(time),
+            `mean time` = mean(time),
+            `max time` = max(time)) %>% 
+  rename(`speciation rate`=speciation_rate)) %>% 
+  kable_styling()
+```
+
+```{r}
+microbench_df %>%
+  filter(scale == "Infinite") %>% 
+  group_by(size, scale, speciation_rate, sigma) %>% 
+    summarise(min_time = min(time),
+            max_time = max(time),
+            mean_time = mean(time),
+            ) %>% 
+  ungroup() %>% 
+  mutate(size=size^2) %>% 
+            ggplot()  +
+  geom_ribbon(aes(x=sigma, 
+                  ymin=min_time, 
+                  ymax=max_time, 
+                  fill=speciation_rate, 
+                  group=speciation_rate), alpha=0.5)+
+          geom_line(aes(x=sigma, 
+                        y=mean_time, 
+                        colour=speciation_rate, 
+                        group=speciation_rate)) + 
+            scale_x_log10("Speciation rate") + 
+            scale_y_continuous("Mean simulation time (seconds)", trans="log2") + 
+  theme_classic() + 
+    facet_grid(.~size)
+```
