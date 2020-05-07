@@ -198,11 +198,20 @@ best_community_reference <- sim$getCommunityReferences() %>%
 
 ```{r echo=FALSE}
 knitr::kable(species_island_A %>%
+  left_join(sim$getCommunityReferences() %>%
+    rename(community_reference = reference)) %>%
+  select(
+    community_reference,
+    speciation_rate,
+    mean_total_species,
+    distance_from_known
+  ) %>%
   head(10) %>%
   rename(
     "community reference" = community_reference,
     "mean sampled species richness" = mean_total_species,
-    "difference from actual" = distance_from_known
+    "difference from actual" = distance_from_known,
+    "speciation rate" = speciation_rate
   ),
 booktabs = T,
 caption = "Simulations sorted by their accuracy to the 'real' species richness from 100 individuals sampled on island A, generating 20 species."
@@ -337,12 +346,12 @@ island_endemics <- sim$getSpeciesLocations(ref) %>%
 knitr::kable(island_endemics %>%
   select(island, total_endemics) %>%
   rename("number of endemics" = total_endemics),
-  booktabs=T,
+booktabs = T,
 caption = "Number of endemic species on each island."
 )
 ```
 
-As expected, the largest island (A) has the most endemics. However, island B has much more than the other two, indicating how the dispersal limitations on island B cause lower species richness overall, but more unique species. Summing these values up means that of the `r sim$getSpeciesRichness(ref)` species in the system, `r sum(island_endemics$total_endemics)` are endemic to an island.
+As expected, the largest island (A) has the most endemics. However, island D has much more than the other two, indicating how the dispersal limitations on island D cause lower species richness overall, but more unique species. Summing these values up means that of the `r sim$getSpeciesRichness(ref)` species in the system, `r sum(island_endemics$total_endemics)` are endemic to an island.
 
 ```{r echo=FALSE, warning=FALSE, fig.fullwidth=TRUE, fig.width=6, fig.cap="Number of endemics on each island. The weights of the arrows represent the dispersal rates between islands. The sizes of the islands represent the number of individuals on each island."}
 
@@ -395,7 +404,7 @@ island_endemics_graph
 
 We have used the modelling framework to estimate the number of species on each island, based on a known species richness within a sample. From this, we have also estimated the number of endemic species on each island, highlighting the importance of dispersal for increasing local species richness, but decreasing endemism. We estimated there to be `r sim$getSpeciesRichness(ref)` species in total within the system, upscaling from the 20 species in our given sample of 100 individuals.
 
-In a real scenario, the dispersal restrictions would likely not be known exactly, but could be estimated for some species based on distance, ocean currents or tracking data. Multiple simulations could then be run to explore the outcomes under a broader set of scenarios. 
+In a real scenario, the dispersal restrictions would likely not be known exactly, but could be estimated for some species based on distance, ocean currents or tracking data. Alternatively, if the simulations can be parameterised to one of more empirical biodiversity measurements, multiple simulations can be run with different dispersal parameters and a goodness-of-fit metric can be used to determine the set of parameters that most closely match to reality. Once the model is parameterised, different simulations can be performed to explore different scenarios.
 
 ```{r warning=FALSE, echo=FALSE}
 # Blend the figures together into a combined plot.

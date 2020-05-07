@@ -41,9 +41,9 @@ if (!dir.exists(figure_directory)) {
 
 The goal of this vignette is to demonstrate the workflow for simulating a habitat loss scenario using rcoalescence and estimating biodiversity losses in different areas of the landscape. It is an extended version of the vignette found within the `rcoalescence` package itself.
 
-We are interested in simulating the effect of habitat loss for a taxon. In our scenario, there is currently an area of land consisting of a protected national park and mixed forest and farmland in the surrounding area. We estimate that the protected national park supports approximately 10 individuals of our taxon per kilometer of complete forest and 0 - 5 individuals per kilometer in the surrounding area, depending on the forest coverage.
+We are interested in simulating the effect of habitat loss for a taxon. In our scenario, there is currently an area of land consisting of a protected national park and mixed forest and farmland in the surrounding area. We estimate that the protected national park supports approximately 10 individuals of our taxon per square kilometer of complete forest and 0- 5 individuals per square kilometer in the surrounding area, depending on the forest coverage.
 
-We wish to model the scenario where a significant portion of the land is completed deforested, resulting in 0 individuals per kilometer in the given area. 
+We wish to model the scenario where a significant portion of the land is completed deforested, resulting in 0 individuals per square kilometer in the given area. 
 
 For the purposes of this demo, maps were extracted and edited from Global Forest Watch [@Greenpeace]. In our model, each pixel on the maps represents one square kilometer.
 
@@ -80,7 +80,7 @@ The modelling aims to answer the following questions:
 - How many species are expected to be lost from the habitat loss?
 - What is the spatial distribution of biodiversity (measured by average number of species per kilometer) before and after the habitat loss?
 
-In this vignette, we use the "present" to refer to the current landscape (represented at time $t = -100$ in the simulation) and use the "future" to refer to the future landscape after 100 generations have passed ($t=100$). Our current landscape contains a total of `r scales::number(total_individuals_prior)` whilst the future landscape contains a total of `r scales::number(total_individuals_post)`, a roughly 22% reduction. Of these, `r scales::number(total_individuals_national_park)` are contained within the national park itself.
+In this vignette, we use the "present" to refer to the current landscape (represented at time $t = -100$ in the simulation) and use the "future" to refer to the future landscape after 100 generations have passed ($t=100$). Our current landscape contains a total of `r scales::number(total_individuals_prior)` individuals whilst the future landscape contains a total of `r scales::number(total_individuals_post)` individuals, a roughly 22% reduction. Of these, `r scales::number(total_individuals_national_park)` are contained within the national park itself.
 
 ```{r echo=FALSE, warning=FALSE, fig.fullwidth=TRUE, fig.width=6, fig.cap="Landscape patterns for our model. Each pixel represents one squared kilometer. The national park is represented a within a subset of the landscape, mostly consisting of high quality habitat."}
 
@@ -228,7 +228,7 @@ mean_species_richness <- species_richness %>%
 
 By adjusting the time variable to be in number of generations from present, instead of number of generations prior to the end point, we get a more meaningful interpretation of species richness over time. We can see that species richness declines after the habitat is lost (which occurs at $t=0$ on the below graph), losing approximately `r scales::number(100 - 100 * mean_richness_after/mean_richness_before)`% of species within a few generations. Our simulation has `r round(mean_richness_before)` species on average for the current landscape shape, and `r round(mean_richness_after)` species on average for the future landscape shape. Note that in this scenario, the high speciation rate means that the relaxation to the new equilibrium state occurs very quickly. For lower speciation rates, this process is likely to occur much more slowly. It is also interesting that the proportional species loss is actually higher than the proportional habitat loss, indicating the biodiversity value of larger areas of poorer quality habitat.
 
-```{r echo=FALSE, fig.fullwidth=TRUE, fig.width=6, fig.cap="Simulated species richness in the landscape as a function of time."}
+```{r echo=FALSE, fig.fullwidth=TRUE, fig.width=6, fig.height=3, fig.cap="Simulated species richness in the landscape as a function of time."}
 species_richness_plot <- mean_species_richness %>% ggplot() +
   geom_ribbon(aes(
     x = 100 - time,
@@ -459,29 +459,34 @@ invisible(dev.off())
 ```
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
-column_1 <- ggarrange(scenario_plot,
+column_1 <- ggarrange(NULL, 
+                      scenario_plot,
   sad_plot + theme(aspect.ratio = 0.7),
   labels = c(
+    "",
     "a) Landscape structure",
     "b) Species abundance distributions for the landscapes"
   ), ncol = 1,
   hjust = 0,
-  vjust = 1,
-  font.label = list(size = 12, face = "bold")
+  vjust = 0.5,
+  font.label = list(size = 12, face = "bold"),
+  heights = c(0.05, 1, 1)
 )
 column_2 <- ggarrange(
+  NULL,
   species_richness_plot + theme(aspect.ratio = 0.5),
   species_density_plot,
   national_park_loss_gain_plot,
-  labels = c(
+  labels = c("", 
     "c) Species richness over time",
     "d) Mean species richness over space",
     "e) Species richness loss/gain within the national park"
   ),
   ncol = 1,
   hjust = 0,
-  vjust = 1,
-  font.label = list(size = 12, face = "bold")
+  vjust = 0.5,
+  font.label = list(size = 12, face = "bold"), 
+  heights = c(0.05, 1, 1, 1)
 )
 
 pdf(file = file.path(figure_directory, "combined_plot.pdf"), 12, 7)
@@ -491,10 +496,10 @@ invisible(dev.off())
 
 # Conclusions
 
-From this modelling demonstration, we can conclude that we should expect to lose approximately `r scales::number(100 - 100 * mean_richness_after/mean_richness_before)`% of the species shortly following the habitat loss. The species are mostly lost in the deforested areas and biodiversity in the remaining landscape remains high. Within the national park, species richness remains broadly similar to the levels prior to the deforestation. However, the process outlined here represents the first step in a modelling study. The next steps would generally be an exploration of parameter space; how do our conclusions change when parameters such as speciation rate and dispersal change? Furthermore, a deeper investigation into other biodiversity metrics, such as species area curves and beta diversity may be required if the scientist wishes to explore these patterns. Speciation rates can be applied post-simulation (a topic not covered here), but for different dispersals, new simulations must be run. Often it is useful to parrellise these models on a high-performance computing cluster, particularly as simulation times quickly explodes as speciation rate drops and the size of the landscape increases.
+From this modelling demonstration, we can conclude that we should expect to lose approximately `r scales::number(100 - 100 * mean_richness_after/mean_richness_before)`% of the species shortly following the habitat loss. The species are mostly lost in the deforested areas and biodiversity in the remaining landscape remains high. Within the national park, species richness remains broadly similar to the levels prior to the deforestation. However, the process outlined here represents the first step in a modelling study. The next steps would generally be an exploration of parameter space; how do our conclusions change when parameters such as speciation rate and dispersal change? Furthermore, a deeper investigation into other biodiversity metrics, such as species area curves and beta diversity may be required if the scientist wishes to explore these patterns. Speciation rates can be applied post-simulation (a topic not covered here), but for different values of the dispersal parameters, new simulations must be run. Often it is useful to parrellise these simulations on a high-performance computing cluster, particularly as simulation times quickly explode as speciation rate drops and the size of the landscape increases.
 
 ## Modifications to the scenario
 
-Using the same process outlined above, any other landscape scenarios can be modelled. For example, what if the a much larger area outside is lost, but a habitat corridor is kept? If the reverse is true (i.e. habitat is reclaimed), how quickly does biodiversity recover? By changing the map files and the times they apply to, these scenarios can be modelled in the same way.
+Using the same process outlined above, any other landscape scenarios can be modelled. For example, what if a much larger area outside the national park is lost, but a habitat corridor is kept? If the reverse is true (i.e. habitat is reclaimed), how quickly does biodiversity recover? By changing the map files and the times they apply to, these scenarios can be modelled in the same way.
 
 # Bibliography
