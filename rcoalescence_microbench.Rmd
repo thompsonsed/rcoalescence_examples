@@ -52,7 +52,7 @@ The microbenchmark code is provided at https://github.com/thompsonsed/pycoalesce
 
 microbench_df <- read.csv(file.path(output_dir, "microbenchmarks.csv")) %>% 
   mutate(scale=as.character(scale)) %>% 
-  bind_rows(read.csv(file.path(output_dir, "microbenchmarks.csv")) %>% 
+  bind_rows(read.csv(file.path(output_dir, "microbenchmarks_infinite.csv")) %>% 
               mutate(scale="infinite")) %>% 
   mutate(scale=factor(ifelse(scale=="infinite", "Infinite", 
                              paste0(scale, "x scale")), 
@@ -111,6 +111,7 @@ microbench_df %>%
 
 ```{r}
 kable(microbench_df %>% 
+        filter(scale=="Infinite") %>% 
   group_by(size, scale, speciation_rate, sigma) %>%
   summarise(`min time` = min(time),
             `mean time` = mean(time),
@@ -139,8 +140,10 @@ microbench_df %>%
                         y=mean_time, 
                         colour=speciation_rate, 
                         group=speciation_rate)) + 
-            scale_x_log10("Speciation rate") + 
+            scale_x_log10("Dispersal rate (sigma)") + 
             scale_y_continuous("Mean simulation time (seconds)", trans="log2") + 
   theme_classic() + 
+  scale_colour_viridis("Speciation rate", option="inferno", end=0.8, trans="log10")+
+  scale_fill_viridis("Speciation rate", option="inferno", end=0.8, trans="log10")+
     facet_grid(.~size)
 ```
