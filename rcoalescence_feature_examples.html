@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Sam Thompson" />
+
+<meta name="date" content="2020-05-10" />
+
+<title>Feature examples</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Feature examples</h1>
+<h4 class="author">Sam Thompson</h4>
+<h4 class="date">2020-05-10</h4>
+
+
+
+<div id="overview" class="section level1">
+<h1>Overview</h1>
+<p><code>rcoalescence</code> is a package for simulating spatially explicit neutral models of ecological systems. The models rely on the user providing a set of simulation parameters, including maps which define the density of organisms across the landscape. Then, the simulation is performed which mimics some of the processes that control biodiversity (including ecological drift, speciation and dispersal). Following this, the simulation output provides a species identity for every individual in the landscape, which can be compared against real data or used to explore potential biodiversity outcomes.</p>
+<p>For the examples provided below, the variables <code>output_dir</code>, <code>fine_map_file</code>, <code>coarse_map_file</code> and <code>dispersal_map_file</code> all represent the paths to the corresponding locations on the filesystem.</p>
+</div>
+<div id="setting-up-a-basic-non-spatial-simulation" class="section level1">
+<h1>Setting up a basic non-spatial simulation</h1>
+<p>To set up a simulation, we first create a new <code>TreeSimulation</code> object and add the required simulation parameters. When a simulation is non-spatial, it is as if all individuals exist within a single well-mixed cell in the landscape. In Python this is</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1"></a>sim <span class="op">=</span> Simulation()</span>
+<span id="cb1-2"><a href="#cb1-2"></a>sim.set_simulation_parameters(seed<span class="op">=</span><span class="dv">1</span>, </span>
+<span id="cb1-3"><a href="#cb1-3"></a>                              task<span class="op">=</span><span class="dv">1</span>, </span>
+<span id="cb1-4"><a href="#cb1-4"></a>                              output_directory<span class="op">=</span>output_dir, </span>
+<span id="cb1-5"><a href="#cb1-5"></a>                              min_speciation_rate<span class="op">=</span><span class="fl">0.1</span>, </span>
+<span id="cb1-6"><a href="#cb1-6"></a>                              deme<span class="op">=</span><span class="dv">100</span>, </span>
+<span id="cb1-7"><a href="#cb1-7"></a>                              spatial<span class="op">=</span><span class="va">False</span>)</span></code></pre></div>
+<p>And equivalently in R as,</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a><span class="co"># First we run a simulation to generate a sample database</span></span>
+<span id="cb2-2"><a href="#cb2-2"></a>simulation &lt;-<span class="st"> </span>TreeSimulation<span class="op">$</span><span class="kw">new</span>()</span>
+<span id="cb2-3"><a href="#cb2-3"></a><span class="co"># Simulate 100 individuals in a non-spatial manner</span></span>
+<span id="cb2-4"><a href="#cb2-4"></a>simulation<span class="op">$</span><span class="kw">setSimulationParameters</span>(</span>
+<span id="cb2-5"><a href="#cb2-5"></a>  <span class="dt">seed =</span> <span class="dv">10</span>, <span class="co"># the seed for random number generation</span></span>
+<span id="cb2-6"><a href="#cb2-6"></a>  <span class="dt">task =</span> <span class="dv">1</span>, <span class="co"># the task for file naming</span></span>
+<span id="cb2-7"><a href="#cb2-7"></a>  <span class="dt">output_directory =</span> output_dir, <span class="co"># the path to the output directory</span></span>
+<span id="cb2-8"><a href="#cb2-8"></a>  <span class="dt">min_speciation_rate =</span> <span class="fl">0.01</span>, <span class="co"># the speciation rate to initially use</span></span>
+<span id="cb2-9"><a href="#cb2-9"></a>  <span class="dt">deme =</span> <span class="dv">100</span> <span class="co"># the number of individuals that occupy a single cell</span></span>
+<span id="cb2-10"><a href="#cb2-10"></a>)</span></code></pre></div>
+<p>The simulation can now be run using <code>run()</code> (Python) or <code>runSimulation()</code> (R). If this function returns <code>FALSE</code>, the simulation has not completed successfully within the time specified.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a>simulation<span class="op">$</span><span class="kw">runSimulation</span>()</span>
+<span id="cb3-2"><a href="#cb3-2"></a><span class="co">#&gt; [1] TRUE</span></span></code></pre></div>
+</div>
+<div id="feature-examples-and-explanations" class="section level1">
+<h1>Feature examples and explanations</h1>
+<p>Here we provide explanations for some of the features of pycoalescence in detail, with example code for running the simulations. Note that throughout the coded examples, setting of parameters often assumes a default value, unless otherwise specified (for example,  is assumed to be , unless given as ). Maps are specified as either paths to the relevant file, a  map (with a value of one at every location), or , meaning no map of that type is required.</p>
+<div id="non-spatialspatially-implicit-models" class="section level2">
+<h2>Non-spatial/spatially implicit models</h2>
+<p>In the simplest form of neutral theory , the replacement for an individual that has died is selected at random from all possible locations. Such models were particularly used at the beginnings of neutral theory due to the relatively straightforward implementation compared with spatially explicit models to test dynamics of species coexistence and community assembly .  packages such as   and   provide non-spatial and spatially implicit options for individual-based simulations of neutral dynamics in addition to the implementation here. We provide equivalent functionality to existing packages here so that simulations of many variants of neutral theory can be run using the same pipeline, with only very minor changes to parameters. A non-spatial simulation of 100 individuals, with speciation rate, <span class="math inline">\(\nu=0.1\)</span> is shown below. The simulation can be made spatially implicit by adding immigration from a metacommunity (see examples in the later section “Immigration from a metacommunity” for using this feature).</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1"></a>sim <span class="op">=</span> Simulation()</span>
+<span id="cb4-2"><a href="#cb4-2"></a>sim.set_simulation_parameters(seed<span class="op">=</span><span class="dv">1</span>, </span>
+<span id="cb4-3"><a href="#cb4-3"></a>                              task<span class="op">=</span><span class="dv">1</span>, </span>
+<span id="cb4-4"><a href="#cb4-4"></a>                              output_directory<span class="op">=</span>output_dir, </span>
+<span id="cb4-5"><a href="#cb4-5"></a>                              min_speciation_rate<span class="op">=</span><span class="fl">0.1</span>, </span>
+<span id="cb4-6"><a href="#cb4-6"></a>                              deme<span class="op">=</span><span class="dv">100</span>, </span>
+<span id="cb4-7"><a href="#cb4-7"></a>                              spatial<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb4-8"><a href="#cb4-8"></a>sim.run()</span></code></pre></div>
+<p>Or in R as</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a>sim &lt;-<span class="st"> </span><span class="kw">TreeSimulation</span>()</span>
+<span id="cb5-2"><a href="#cb5-2"></a>sim<span class="op">$</span><span class="kw">setSimulationParameters</span>(</span>
+<span id="cb5-3"><a href="#cb5-3"></a>  <span class="dt">task =</span> <span class="dv">1</span>,</span>
+<span id="cb5-4"><a href="#cb5-4"></a>  <span class="dt">seed =</span> <span class="dv">1</span>,</span>
+<span id="cb5-5"><a href="#cb5-5"></a>  <span class="dt">min_speciation_rate =</span> <span class="fl">0.1</span>,</span>
+<span id="cb5-6"><a href="#cb5-6"></a>  <span class="dt">deme =</span> <span class="dv">100</span>,</span>
+<span id="cb5-7"><a href="#cb5-7"></a>  <span class="dt">output_directory =</span> output_dir</span>
+<span id="cb5-8"><a href="#cb5-8"></a>)</span>
+<span id="cb5-9"><a href="#cb5-9"></a>sim<span class="op">$</span><span class="kw">runSimulation</span>()</span>
+<span id="cb5-10"><a href="#cb5-10"></a><span class="co">#&gt; [1] TRUE</span></span>
+<span id="cb5-11"><a href="#cb5-11"></a>sim<span class="op">$</span><span class="kw">applySpeciationRates</span>(<span class="dt">speciation_rates =</span> <span class="kw">c</span>(<span class="fl">0.1</span>))</span>
+<span id="cb5-12"><a href="#cb5-12"></a>sim<span class="op">$</span><span class="kw">output</span>()</span></code></pre></div>
+</div>
+<div id="spatially-explicit-models" class="section level2">
+<h2>Spatially explicit models</h2>
+<p>For spatially explicit simulations, the file locations for any necessary maps are required as input parameters. For map files, specifying “null” indicates a map with the value of one everywhere; if the map defines density, then this means one individual in every cell; if the map defines reproduction or death rates, then this means all cells have identical rates; if the map defines sampling, then this means all individuals in every cell are sampled. If no map file of a specific kind is required (e.g. for scenarios which do not need a map of dispersal rates), then specifying “none” switches off that feature. The user can provide two resolutions of density map – “fine” and “coarse” maps – which correspond to different spatial scales: the fine map provides high resolution density for a smaller area and the coarse map provides lower resolution density for a much larger area. Individuals are sampled from within the “fine” map (or from a subset of the “fine” map, if a sample map is used), and the “coarse” landscape acts as a source of biodiversity. Splitting the density into two resolutions of map allows for very large landscapes to be simulated without equally large increases in RAM usage.</p>
+</div>
+<div id="dispersal" class="section level2">
+<h2>Dispersal</h2>
+<p>As described in the main text, two forms of dispersal are possible in these packages: using a dispersal kernel to describe distributions of dispersal distances, or using a dispersal matrix to describe dispersal probabilities between every cell in the landscape.</p>
+<p>By default, the model runs with a normal dispersal kernel, so supplying  parameter is all that is required. The code required for this is:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1"></a> sim <span class="op">=</span> Simulation()</span>
+<span id="cb6-2"><a href="#cb6-2"></a> sim.set_simulation_parameters(seed<span class="op">=</span><span class="dv">1</span>, </span>
+<span id="cb6-3"><a href="#cb6-3"></a>                               task<span class="op">=</span><span class="dv">1</span>, </span>
+<span id="cb6-4"><a href="#cb6-4"></a>                               output_directory<span class="op">=</span>output_dir, </span>
+<span id="cb6-5"><a href="#cb6-5"></a>                               min_speciation_rate<span class="op">=</span><span class="fl">0.1</span>, </span>
+<span id="cb6-6"><a href="#cb6-6"></a>                               sigma<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb6-7"><a href="#cb6-7"></a> sim.set_map(<span class="st">&quot;null&quot;</span>, x_size<span class="op">=</span><span class="dv">100</span>, y_size<span class="op">=</span><span class="dv">100</span>)</span>
+<span id="cb6-8"><a href="#cb6-8"></a> sim.run()</span></code></pre></div>
+<p>And, equivalently using R,</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a>sim &lt;-<span class="st"> </span><span class="kw">SpatialTreeSimulation</span>()</span>
+<span id="cb7-2"><a href="#cb7-2"></a>sim<span class="op">$</span><span class="kw">setSimulationParameters</span>(</span>
+<span id="cb7-3"><a href="#cb7-3"></a>  <span class="dt">task =</span> <span class="dv">1</span>,</span>
+<span id="cb7-4"><a href="#cb7-4"></a>  <span class="dt">seed =</span> <span class="dv">1</span>,</span>
+<span id="cb7-5"><a href="#cb7-5"></a>  <span class="dt">min_speciation_rate =</span> <span class="fl">0.1</span>,</span>
+<span id="cb7-6"><a href="#cb7-6"></a>  <span class="dt">output_directory =</span> output_dir,</span>
+<span id="cb7-7"><a href="#cb7-7"></a>  <span class="dt">fine_map_file =</span> <span class="st">&quot;null&quot;</span>,</span>
+<span id="cb7-8"><a href="#cb7-8"></a>  <span class="dt">fine_map_x_size =</span> <span class="dv">10</span>,</span>
+<span id="cb7-9"><a href="#cb7-9"></a>  <span class="dt">fine_map_y_size =</span> <span class="dv">10</span>,</span>
+<span id="cb7-10"><a href="#cb7-10"></a>  <span class="dt">sigma =</span> <span class="dv">2</span></span>
+<span id="cb7-11"><a href="#cb7-11"></a>)</span>
+<span id="cb7-12"><a href="#cb7-12"></a>sim<span class="op">$</span><span class="kw">runSimulation</span>()</span>
+<span id="cb7-13"><a href="#cb7-13"></a><span class="co">#&gt; [1] TRUE</span></span>
+<span id="cb7-14"><a href="#cb7-14"></a>sim<span class="op">$</span><span class="kw">applySpeciationRates</span>(<span class="dt">speciation_rates =</span> <span class="kw">c</span>(<span class="fl">0.1</span>))</span>
+<span id="cb7-15"><a href="#cb7-15"></a>sim<span class="op">$</span><span class="kw">output</span>()</span></code></pre></div>
+<p>A dispersal matrix, stored as a map, is the alternative method of simulating dispersal within the simulation. Fig.  indicates the process of transforming a landscape of connected islands into a matrix of dispersal probabilities. Dispersal probabilities are given as relative dispersal rates and transformed internally to a cumulative probability distribution across each row. A uniform random number from 0 to 1 is generated to pick the destination cell, which corresponds to one cell selected from the cumulative probability distribution.</p>
+<p>A dispersal map is used as shown below.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1"></a>sim <span class="op">=</span> Simulation()</span>
+<span id="cb8-2"><a href="#cb8-2"></a>sim.set_simulation_parameters(seed<span class="op">=</span><span class="dv">1</span>, </span>
+<span id="cb8-3"><a href="#cb8-3"></a>                              task<span class="op">=</span><span class="dv">1</span>, </span>
+<span id="cb8-4"><a href="#cb8-4"></a>                              output_directory<span class="op">=</span>output_dir,</span>
+<span id="cb8-5"><a href="#cb8-5"></a>                              min_speciation_rate<span class="op">=</span><span class="fl">0.1</span>)</span>
+<span id="cb8-6"><a href="#cb8-6"></a>sim.set_map_files(sample_file<span class="op">=</span><span class="st">&quot;null&quot;</span>, </span>
+<span id="cb8-7"><a href="#cb8-7"></a>                  fine_file<span class="op">=</span>fine_map_file, </span>
+<span id="cb8-8"><a href="#cb8-8"></a>                  dispersal_file<span class="op">=</span>dispersal_map_file)</span>
+<span id="cb8-9"><a href="#cb8-9"></a>sim.run()</span></code></pre></div>
+<p>For R this is,</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a>sim &lt;-<span class="st"> </span><span class="kw">SpatialTreeSimulation</span>()</span>
+<span id="cb9-2"><a href="#cb9-2"></a>sim<span class="op">$</span><span class="kw">setSimulationParameters</span>(</span>
+<span id="cb9-3"><a href="#cb9-3"></a>  <span class="dt">task =</span> <span class="dv">1</span>,</span>
+<span id="cb9-4"><a href="#cb9-4"></a>  <span class="dt">seed =</span> <span class="dv">1</span>,</span>
+<span id="cb9-5"><a href="#cb9-5"></a>  <span class="dt">min_speciation_rate =</span> <span class="fl">0.1</span>,</span>
+<span id="cb9-6"><a href="#cb9-6"></a>  <span class="dt">output_directory =</span> output_dir,</span>
+<span id="cb9-7"><a href="#cb9-7"></a>  <span class="dt">fine_map_file =</span> fine_map_file,</span>
+<span id="cb9-8"><a href="#cb9-8"></a>  <span class="dt">dispersal_map_file =</span> dispersal_map_file</span>
+<span id="cb9-9"><a href="#cb9-9"></a>)</span>
+<span id="cb9-10"><a href="#cb9-10"></a>sim<span class="op">$</span><span class="kw">runSimulation</span>()</span>
+<span id="cb9-11"><a href="#cb9-11"></a><span class="co">#&gt; [1] TRUE</span></span>
+<span id="cb9-12"><a href="#cb9-12"></a>sim<span class="op">$</span><span class="kw">applySpeciationRates</span>(<span class="dt">speciation_rates =</span> <span class="kw">c</span>(<span class="fl">0.1</span>))</span>
+<span id="cb9-13"><a href="#cb9-13"></a>sim<span class="op">$</span><span class="kw">output</span>()</span></code></pre></div>
+</div>
+<div id="spatially-varying-density" class="section level2">
+<h2>Spatially varying density</h2>
+<p>Frequently, the pattern of habitat is not contiguous and does not necessarily contain the same density of individuals everywhere. Incorporating density maps into the model allows for simulations on landscapes that vary in the number of individuals per cell. In a neutral model, individuals of all species are assumed to compete for the same space, so the density of a cell is given as the total number of individuals of all species existing in that location.</p>
+<p>Our implementation of density can use two resolutions of density map: the fine density map represents high-resolution spatial density of individuals in the immediate area of interest; the coarse density represents lower-resolution density across a much larger area. Under this system, very large spatial scales can be simulated without unreasonable RAM usage. For example, a 1000x1000 fine map with a resolution of 10m by 10m could be used with a 1000x1000 coarse map with a resolution of 100m by 100m. The fine map would cover an area of <span class="math inline">\(100km^2\)</span> while the coarse map would cover <span class="math inline">\(10^4km^2\)</span>. The rationale behind this is that, assuming the area covered by the fine map encompasses the sample region of interest and a large surrounding area, the finer details of spatial structure at distant locations is not important and so can be contained in a lower resolution coarse map. The spatial location of individuals is always recorded at the full resolution for the coalescence process, with the distinction between the fine and coarse files applying just to the density within each cell.</p>
+<p>A  parameter can also be set to globally scale the number of individuals per cell. The user can then parameterize for mean density using  without re-generating the fine and coarse map files. The final number of individuals at each <span class="math inline">\(x,y\)</span> location, <span class="math inline">\(n_{x,y}\)</span>, is given as <span class="math inline">\(n_{x, y} = m_{x, y} \cdot d\)</span> where <span class="math inline">\(m_{x,y}\)</span> is the density map value and <span class="math inline">\(d\)</span> is the global  parameter. As an example, we use a fine and coarse map, =10, <span class="math inline">\(\nu = 0.1\)</span> and <span class="math inline">\(\sigma = 2\)</span>.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1"></a>sim <span class="op">=</span> Simulation()</span>
+<span id="cb10-2"><a href="#cb10-2"></a>sim.set_simulation_parameters(seed<span class="op">=</span><span class="dv">1</span>, </span>
+<span id="cb10-3"><a href="#cb10-3"></a>                              task<span class="op">=</span><span class="dv">1</span>, </span>
+<span id="cb10-4"><a href="#cb10-4"></a>                              output_directory<span class="op">=</span>output_dir, </span>
+<span id="cb10-5"><a href="#cb10-5"></a>                              min_speciation_rate<span class="op">=</span><span class="fl">0.1</span>, </span>
+<span id="cb10-6"><a href="#cb10-6"></a>                              deme<span class="op">=</span><span class="dv">10</span>, </span>
+<span id="cb10-7"><a href="#cb10-7"></a>                              sigma<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb10-8"><a href="#cb10-8"></a>sim.set_map_files(sample_file<span class="op">=</span><span class="st">&quot;null&quot;</span>, </span>
+<span id="cb10-9"><a href="#cb10-9"></a>                  fine_file<span class="op">=</span>fine_map_file, </span>
+<span id="cb10-10"><a href="#cb10-10"></a>                  coarse_file<span class="op">=</span>coarse_map_file)</span>
+<span id="cb10-11"><a href="#cb10-11"></a>sim.run()</span></code></pre></div>
+<p>Equivalently, in R,</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1"></a>sim &lt;-<span class="st"> </span><span class="kw">SpatialTreeSimulation</span>()</span>
+<span id="cb11-2"><a href="#cb11-2"></a>sim<span class="op">$</span><span class="kw">setSimulationParameters</span>(</span>
+<span id="cb11-3"><a href="#cb11-3"></a>  <span class="dt">task =</span> <span class="dv">1</span>,</span>
+<span id="cb11-4"><a href="#cb11-4"></a>  <span class="dt">seed =</span> <span class="dv">1</span>,</span>
+<span id="cb11-5"><a href="#cb11-5"></a>  <span class="dt">min_speciation_rate =</span> <span class="fl">0.1</span>,</span>
+<span id="cb11-6"><a href="#cb11-6"></a>  <span class="dt">deme =</span> <span class="dv">10</span>,</span>
+<span id="cb11-7"><a href="#cb11-7"></a>  <span class="dt">output_directory =</span> output_dir,</span>
+<span id="cb11-8"><a href="#cb11-8"></a>  <span class="dt">fine_map_file =</span> fine_map_file,</span>
+<span id="cb11-9"><a href="#cb11-9"></a>  <span class="dt">coarse_map_file =</span> coarse_map_file,</span>
+<span id="cb11-10"><a href="#cb11-10"></a>  <span class="dt">sigma =</span> <span class="dv">2</span></span>
+<span id="cb11-11"><a href="#cb11-11"></a>)</span>
+<span id="cb11-12"><a href="#cb11-12"></a>sim<span class="op">$</span><span class="kw">runSimulation</span>()</span>
+<span id="cb11-13"><a href="#cb11-13"></a><span class="co">#&gt; [1] TRUE</span></span>
+<span id="cb11-14"><a href="#cb11-14"></a>sim<span class="op">$</span><span class="kw">applySpeciationRates</span>(<span class="dt">speciation_rates =</span> <span class="kw">c</span>(<span class="fl">0.1</span>))</span>
+<span id="cb11-15"><a href="#cb11-15"></a>sim<span class="op">$</span><span class="kw">output</span>()</span></code></pre></div>
+<p>Historical density maps are used to represent changing habitat structure over time. As well as specifying the map files, the user specifies the time, in generations prior to the simulation start, and (optionally) rate of the change. The rate variable allows for a graduated change between map files, rather than a stepwise increase in density. A rate of 0.0 (the default) means the change between the current and historical maps occurs stepwise at the specified generation. A rate of 1.0 represents a consistent, linearly increasing contribution of the historical map, with the historical map being assumed completely by the specified generation. A rate of 0.5 represents half the difference occurs gradually over time and the remaining half occurs stepwise.</p>
+<p>As an example, we expand on the previous example to use three sets of maps, one at the present day, one at 10 generations before the present and one at 100 generations.</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1"></a>sim <span class="op">=</span> Simulation()</span>
+<span id="cb12-2"><a href="#cb12-2"></a>sim.set_simulation_parameters(seed<span class="op">=</span><span class="dv">1</span>, </span>
+<span id="cb12-3"><a href="#cb12-3"></a>                              task<span class="op">=</span><span class="dv">1</span>, </span>
+<span id="cb12-4"><a href="#cb12-4"></a>                              output_directory<span class="op">=</span>output_dir, </span>
+<span id="cb12-5"><a href="#cb12-5"></a>                              min_speciation_rate<span class="op">=</span><span class="fl">0.1</span>, </span>
+<span id="cb12-6"><a href="#cb12-6"></a>                              deme<span class="op">=</span><span class="dv">10</span>, </span>
+<span id="cb12-7"><a href="#cb12-7"></a>                              sigma<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb12-8"><a href="#cb12-8"></a>sim.set_map_files(sample_file<span class="op">=</span><span class="st">&quot;null&quot;</span>, </span>
+<span id="cb12-9"><a href="#cb12-9"></a>                  fine_file<span class="op">=</span>fine_map_file, </span>
+<span id="cb12-10"><a href="#cb12-10"></a>                  coarse_file<span class="op">=</span>coarse_map_file)</span>
+<span id="cb12-11"><a href="#cb12-11"></a>sim.add_historical_map(fine_file<span class="op">=</span>historical_fine_map_file1, </span>
+<span id="cb12-12"><a href="#cb12-12"></a>                       coarse_file<span class="op">=</span>historical_coarse_map_file1, </span>
+<span id="cb12-13"><a href="#cb12-13"></a>                       time<span class="op">=</span><span class="dv">10</span>, </span>
+<span id="cb12-14"><a href="#cb12-14"></a>                       rate<span class="op">=</span><span class="fl">1.0</span>)</span>
+<span id="cb12-15"><a href="#cb12-15"></a>sim.add_historical_map(fine_file<span class="op">=</span>historical_fine_map_file2, </span>
+<span id="cb12-16"><a href="#cb12-16"></a>                       coarse_file<span class="op">=</span>historical_coarse_map_file2, </span>
+<span id="cb12-17"><a href="#cb12-17"></a>                       time<span class="op">=</span><span class="dv">100</span>, </span>
+<span id="cb12-18"><a href="#cb12-18"></a>                       rate<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb12-19"><a href="#cb12-19"></a>sim.run()</span></code></pre></div>
+<p>And in R,</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1"></a>sim &lt;-<span class="st"> </span><span class="kw">SpatialTreeSimulation</span>()</span>
+<span id="cb13-2"><a href="#cb13-2"></a>sim<span class="op">$</span><span class="kw">setSimulationParameters</span>(</span>
+<span id="cb13-3"><a href="#cb13-3"></a>  <span class="dt">task =</span> <span class="dv">1</span>,</span>
+<span id="cb13-4"><a href="#cb13-4"></a>  <span class="dt">seed =</span> <span class="dv">1</span>,</span>
+<span id="cb13-5"><a href="#cb13-5"></a>  <span class="dt">min_speciation_rate =</span> <span class="fl">0.1</span>,</span>
+<span id="cb13-6"><a href="#cb13-6"></a>  <span class="dt">deme =</span> <span class="dv">10</span>,</span>
+<span id="cb13-7"><a href="#cb13-7"></a>  <span class="dt">output_directory =</span> output_dir,</span>
+<span id="cb13-8"><a href="#cb13-8"></a>  <span class="dt">fine_map_file =</span> fine_map_file,</span>
+<span id="cb13-9"><a href="#cb13-9"></a>  <span class="dt">coarse_map_file =</span> coarse_map_file,</span>
+<span id="cb13-10"><a href="#cb13-10"></a>  <span class="dt">sigma =</span> <span class="dv">2</span>,</span>
+<span id="cb13-11"><a href="#cb13-11"></a>  <span class="dt">partial_setup=</span><span class="ot">TRUE</span></span>
+<span id="cb13-12"><a href="#cb13-12"></a>)</span>
+<span id="cb13-13"><a href="#cb13-13"></a>sim<span class="op">$</span><span class="kw">addHistoricalMap</span>(</span>
+<span id="cb13-14"><a href="#cb13-14"></a>  <span class="dt">historical_fine_map =</span> historical_fine_map_file1,</span>
+<span id="cb13-15"><a href="#cb13-15"></a>  <span class="dt">historical_coarse_map =</span> historical_coarse_map_file1,</span>
+<span id="cb13-16"><a href="#cb13-16"></a>  <span class="dt">gen_since_historical =</span> <span class="dv">10</span></span>
+<span id="cb13-17"><a href="#cb13-17"></a>)</span>
+<span id="cb13-18"><a href="#cb13-18"></a>sim<span class="op">$</span><span class="kw">addHistoricalMap</span>(</span>
+<span id="cb13-19"><a href="#cb13-19"></a>  <span class="dt">historical_fine_map =</span> historical_fine_map_file2,</span>
+<span id="cb13-20"><a href="#cb13-20"></a>  <span class="dt">historical_coarse_map =</span> historical_coarse_map_file2,</span>
+<span id="cb13-21"><a href="#cb13-21"></a>  <span class="dt">gen_since_historical =</span> <span class="dv">100</span></span>
+<span id="cb13-22"><a href="#cb13-22"></a>)</span>
+<span id="cb13-23"><a href="#cb13-23"></a>sim<span class="op">$</span><span class="kw">runSimulation</span>()</span>
+<span id="cb13-24"><a href="#cb13-24"></a><span class="co">#&gt; [1] TRUE</span></span>
+<span id="cb13-25"><a href="#cb13-25"></a>sim<span class="op">$</span><span class="kw">applySpeciationRates</span>(<span class="dt">speciation_rates =</span> <span class="kw">c</span>(<span class="fl">0.1</span>))</span>
+<span id="cb13-26"><a href="#cb13-26"></a>sim<span class="op">$</span><span class="kw">output</span>()</span></code></pre></div>
+<p>Here, the setup function is called in multiple parts (using <code>setInitialSimulationParameters</code>, <code>setMapParameters</code>, <code>setDispersalParameters</code> and <code>addHistoricalMap</code> instead of a single <code>setSimulationParameters</code> call) because we want to add multiple historical maps.</p>
+<p>In many scenarios it may be desirable to use an infinite landscape. Here, three variations of such a landscape are provided. The default infinite landscape assumes everywhere outside the supplied maps has a density equal to the deme size of the simulation. The alternatives are for where the fine or coarse maps are tiled infinitely in all directions, repeating the spatial structuring of habitat. All three options, described as “infinite”, “tiled_fine” or “tiled_coarse” trace lineages’ positions in the same way. An example of the first option is given below.</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1"></a>sim <span class="op">=</span> Simulation()</span>
+<span id="cb14-2"><a href="#cb14-2"></a>sim.set_simulation_parameters(seed<span class="op">=</span><span class="dv">1</span>, </span>
+<span id="cb14-3"><a href="#cb14-3"></a>                              task<span class="op">=</span><span class="dv">1</span>, </span>
+<span id="cb14-4"><a href="#cb14-4"></a>                              output_directory<span class="op">=</span>output_dir, </span>
+<span id="cb14-5"><a href="#cb14-5"></a>                              min_speciation_rate<span class="op">=</span><span class="fl">0.1</span>, </span>
+<span id="cb14-6"><a href="#cb14-6"></a>                              deme<span class="op">=</span><span class="dv">10</span>, </span>
+<span id="cb14-7"><a href="#cb14-7"></a>                              sigma<span class="op">=</span><span class="dv">2</span>, </span>
+<span id="cb14-8"><a href="#cb14-8"></a>                              landscape_type<span class="op">=</span><span class="st">&quot;infinite&quot;</span>)</span>
+<span id="cb14-9"><a href="#cb14-9"></a>sim.set_map(<span class="st">&quot;null&quot;</span>, x_size<span class="op">=</span><span class="dv">100</span>, y_size<span class="op">=</span><span class="dv">100</span>)</span>
+<span id="cb14-10"><a href="#cb14-10"></a>sim.run()</span></code></pre></div>
+<p>And in R as</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1"></a>sim &lt;-<span class="st"> </span><span class="kw">SpatialTreeSimulation</span>()</span>
+<span id="cb15-2"><a href="#cb15-2"></a>sim<span class="op">$</span><span class="kw">setSimulationParameters</span>(</span>
+<span id="cb15-3"><a href="#cb15-3"></a>  <span class="dt">task =</span> <span class="dv">1</span>,</span>
+<span id="cb15-4"><a href="#cb15-4"></a>  <span class="dt">seed =</span> <span class="dv">1</span>,</span>
+<span id="cb15-5"><a href="#cb15-5"></a>  <span class="dt">min_speciation_rate =</span> <span class="fl">0.1</span>,</span>
+<span id="cb15-6"><a href="#cb15-6"></a>  <span class="dt">deme =</span> <span class="dv">10</span>,</span>
+<span id="cb15-7"><a href="#cb15-7"></a>  <span class="dt">output_directory =</span> output_dir,</span>
+<span id="cb15-8"><a href="#cb15-8"></a>  <span class="dt">fine_map_file =</span> <span class="st">&quot;null&quot;</span>,</span>
+<span id="cb15-9"><a href="#cb15-9"></a>  <span class="dt">fine_map_x_size =</span> <span class="dv">100</span>,</span>
+<span id="cb15-10"><a href="#cb15-10"></a>  <span class="dt">fine_map_y_size =</span> <span class="dv">100</span>,</span>
+<span id="cb15-11"><a href="#cb15-11"></a>  <span class="dt">sigma =</span> <span class="dv">2</span>,</span>
+<span id="cb15-12"><a href="#cb15-12"></a>  <span class="dt">landscape_type =</span> <span class="st">&quot;infinite&quot;</span></span>
+<span id="cb15-13"><a href="#cb15-13"></a>)</span>
+<span id="cb15-14"><a href="#cb15-14"></a>sim<span class="op">$</span><span class="kw">runSimulation</span>()</span>
+<span id="cb15-15"><a href="#cb15-15"></a><span class="co">#&gt; [1] TRUE</span></span>
+<span id="cb15-16"><a href="#cb15-16"></a>sim<span class="op">$</span><span class="kw">applySpeciationRates</span>(<span class="dt">speciation_rates =</span> <span class="kw">c</span>(<span class="fl">0.1</span>))</span>
+<span id="cb15-17"><a href="#cb15-17"></a>sim<span class="op">$</span><span class="kw">output</span>()</span></code></pre></div>
+<p>Each individual’s <span class="math inline">\(x,y\)</span> location is stored in reference to a “grid”, the dimensions of which are set either from the fine resolution density map, or manually by the user. When an individual is contained within the grid, it is stored in a list of all other individuals at that location, meaning fast calculations for coalescence events when it is necessary to choose an individual randomly from those in the cell. When the location falls outside of the grid, its position is stored as if the landscape wraps from the top to bottom and left to right, so that <span class="math inline">\(x, y\)</span> always falls on the grid. In addition, the parameters describing how many times the wrapping occurs in each dimension, <span class="math inline">\(x_{wrap}, y_{wrap}\)</span>, are used to store the exact position in space. A coalescence event at location <span class="math inline">\(x, y, x_{wrap}, y_{wrap}\)</span> is calculated by first determining all individuals that have the same <span class="math inline">\(x, y\)</span>, then by counting those that also match <span class="math inline">\(x_{wrap}\)</span> and <span class="math inline">\(y_{wrap}\)</span>. Note that the exact position of every individual is still held in space, but this method of wrapping is much more computationally efficient in terms of RAM; the only requirements are for storing the grid, plus some small overhead for wrapped lineages. As such, infinite landscapes can be modeled with a finite amount of memory.</p>
+</div>
+<div id="spatially-varying-sampling-effort" class="section level2">
+<h2>Spatially varying sampling effort</h2>
+<p>Often the areas of interest represent a selection of locations across a landscape. Simulating every individual when the landscape is very large will often lead to extremely long compute times and in many cases is simply not possible with current hardware. Fortunately, coalescence methods allow for only those individuals contained within the areas of interest to be simulated. Here this is achieved through a sample map where the values represent the relative sampling effort for each cell. The sample map should be entirely contained within the fine map.</p>
+<p>Similarly to the  variable for density, the global sample rate can be modified through the  parameter. The total number of individuals sampled at each <span class="math inline">\(x, y\)</span> location, <span class="math inline">\(\bar{n}_{x, y}\)</span>, is given as <span class="math inline">\(\bar{n}_{x, y} = m_{x, y}\cdot d \cdot s_{x,y} \cdot \hat{s}\)</span> where <span class="math inline">\(m_{x,y}\)</span> is the density of individuals, <span class="math inline">\(d\)</span> is the global  parameter, <span class="math inline">\(s_{x,y}\)</span> is the sample map value and <span class="math inline">\(\hat{s}\)</span> is the global sample rate, . An example is given below, sampling half of the 10 individuals within each cell.</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1"></a>sim <span class="op">=</span> Simulation()</span>
+<span id="cb16-2"><a href="#cb16-2"></a>sim.set_simulation_parameters(seed<span class="op">=</span><span class="dv">1</span>, </span>
+<span id="cb16-3"><a href="#cb16-3"></a>                              task<span class="op">=</span><span class="dv">1</span>, </span>
+<span id="cb16-4"><a href="#cb16-4"></a>                              output_directory<span class="op">=</span>output_dir, </span>
+<span id="cb16-5"><a href="#cb16-5"></a>                              min_speciation_rate<span class="op">=</span><span class="fl">0.1</span>, </span>
+<span id="cb16-6"><a href="#cb16-6"></a>                              deme<span class="op">=</span><span class="dv">10</span>, </span>
+<span id="cb16-7"><a href="#cb16-7"></a>                              sigma<span class="op">=</span><span class="dv">2</span>, </span>
+<span id="cb16-8"><a href="#cb16-8"></a>                              landscape_type<span class="op">=</span><span class="st">&quot;closed&quot;</span>, </span>
+<span id="cb16-9"><a href="#cb16-9"></a>                              sample_size<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb16-10"><a href="#cb16-10"></a>sim.set_map_files(sample_map_file, fine_map_file)</span>
+<span id="cb16-11"><a href="#cb16-11"></a>sim.run()</span></code></pre></div>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1"></a>sim &lt;-<span class="st"> </span><span class="kw">SpatialTreeSimulation</span>()</span>
+<span id="cb17-2"><a href="#cb17-2"></a>sim<span class="op">$</span><span class="kw">setSimulationParameters</span>(</span>
+<span id="cb17-3"><a href="#cb17-3"></a>  <span class="dt">task =</span> <span class="dv">1</span>,</span>
+<span id="cb17-4"><a href="#cb17-4"></a>  <span class="dt">seed =</span> <span class="dv">1</span>,</span>
+<span id="cb17-5"><a href="#cb17-5"></a>  <span class="dt">min_speciation_rate =</span> <span class="fl">0.1</span>,</span>
+<span id="cb17-6"><a href="#cb17-6"></a>  <span class="dt">deme =</span> <span class="dv">10</span>,</span>
+<span id="cb17-7"><a href="#cb17-7"></a>  <span class="dt">output_directory =</span> output_dir,</span>
+<span id="cb17-8"><a href="#cb17-8"></a>  <span class="dt">sample_mask_file =</span> sample_map_file,</span>
+<span id="cb17-9"><a href="#cb17-9"></a>  <span class="dt">fine_map_file =</span> fine_map_file,</span>
+<span id="cb17-10"><a href="#cb17-10"></a>  <span class="dt">coarse_map_file =</span> coarse_map_file,</span>
+<span id="cb17-11"><a href="#cb17-11"></a>  <span class="dt">sigma =</span> <span class="dv">2</span></span>
+<span id="cb17-12"><a href="#cb17-12"></a>)</span>
+<span id="cb17-13"><a href="#cb17-13"></a>sim<span class="op">$</span><span class="kw">runSimulation</span>()</span>
+<span id="cb17-14"><a href="#cb17-14"></a><span class="co">#&gt; [1] TRUE</span></span>
+<span id="cb17-15"><a href="#cb17-15"></a>sim<span class="op">$</span><span class="kw">applySpeciationRates</span>(<span class="dt">speciation_rates =</span> <span class="kw">c</span>(<span class="fl">0.1</span>))</span>
+<span id="cb17-16"><a href="#cb17-16"></a>sim<span class="op">$</span><span class="kw">output</span>()</span></code></pre></div>
+</div>
+<div id="spatially-varying-reproduction-and-death-rates" class="section level2">
+<h2>Spatially varying reproduction and death rates</h2>
+<p>The reproduction and death rates in a standard simulation are assumed to be equal per capita for each individual in the landscape. If this is not the case, map files can be provided to indicate spatially varying demographic rates. Both reproduction and death are still neutral to species’ identity, as all individuals (and therefore species) within each cell will be affected equally.</p>
+<p>The reproduction rate can be conceptualized as the number of propagules generated by adults within a particular cell. The coalescence-based implementation of this process here uses rejection sampling of cells based on the relative reproductive potential compared to the maximum reproductive rate across the landscape. For example, if the maximum reproductive rate is 10, a cell with a value of 1 will be rejected 90% of the time as a potential parent. This is equivalent to a forwards-time interpretation whereby the parent in the more reproductive cell propagates ten times the number of offspring. In the special case that a dispersal map is provided instead of relying on a dispersal kernel, the reproductive rates can be incorporated into the dispersal map itself for efficiency. Doing so removes the requirement to rejection-sample (which is computationally expensive) and instead the probability distribution for every possible dispersal event is pre-calculated providing a direct method of choosing the parent.</p>
+<p>The death rate of a cell in a zero-sum neutral model is equivalent to both the maturation and turnover rate. Similar to reproduction rates, death rates are implemented through rejection sampling the individual chosen to be “un-born” (the backwards-time equivalent to a death event) based on the maximal death rate across a landscape.</p>
+<p>Both reproduction rates and death rates can be added in combination with a fine map file in the manner shown below. The dimensions of the death and reproduction map should match the dimensions of the fine map.</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1"></a>sim <span class="op">=</span> Simulation()</span>
+<span id="cb18-2"><a href="#cb18-2"></a>sim.set_simulation_parameters(seed<span class="op">=</span><span class="dv">1</span>, </span>
+<span id="cb18-3"><a href="#cb18-3"></a>                              task<span class="op">=</span><span class="dv">1</span>, </span>
+<span id="cb18-4"><a href="#cb18-4"></a>                              output_directory<span class="op">=</span>output_dir, </span>
+<span id="cb18-5"><a href="#cb18-5"></a>                              min_speciation_rate<span class="op">=</span><span class="fl">0.1</span>, </span>
+<span id="cb18-6"><a href="#cb18-6"></a>                              deme<span class="op">=</span><span class="dv">10</span>, </span>
+<span id="cb18-7"><a href="#cb18-7"></a>                              sigma<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb18-8"><a href="#cb18-8"></a>sim.set_map_files(sample_map_file, fine_map_file)</span>
+<span id="cb18-9"><a href="#cb18-9"></a>sim.add_reproduction_map(reproduction_file)</span>
+<span id="cb18-10"><a href="#cb18-10"></a>sim.add_death_map(death_file)</span>
+<span id="cb18-11"><a href="#cb18-11"></a>sim.run()</span></code></pre></div>
+<p>And for R as,</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1"></a>sim &lt;-<span class="st"> </span><span class="kw">SpatialTreeSimulation</span>()</span>
+<span id="cb19-2"><a href="#cb19-2"></a>sim<span class="op">$</span><span class="kw">setSimulationParameters</span>(</span>
+<span id="cb19-3"><a href="#cb19-3"></a>  <span class="dt">task =</span> <span class="dv">1</span>,</span>
+<span id="cb19-4"><a href="#cb19-4"></a>  <span class="dt">seed =</span> <span class="dv">1</span>,</span>
+<span id="cb19-5"><a href="#cb19-5"></a>  <span class="dt">min_speciation_rate =</span> <span class="fl">0.1</span>,</span>
+<span id="cb19-6"><a href="#cb19-6"></a>  <span class="dt">deme =</span> <span class="dv">10</span>,</span>
+<span id="cb19-7"><a href="#cb19-7"></a>  <span class="dt">output_directory =</span> output_dir,</span>
+<span id="cb19-8"><a href="#cb19-8"></a>  <span class="dt">fine_map_file =</span> fine_map_file,</span>
+<span id="cb19-9"><a href="#cb19-9"></a>  <span class="dt">sigma =</span> <span class="dv">2</span>,</span>
+<span id="cb19-10"><a href="#cb19-10"></a>  <span class="dt">reproduction_map_file =</span> reproduction_map_file,</span>
+<span id="cb19-11"><a href="#cb19-11"></a>  <span class="dt">death_map_file =</span> death_map_file</span>
+<span id="cb19-12"><a href="#cb19-12"></a>)</span>
+<span id="cb19-13"><a href="#cb19-13"></a>sim<span class="op">$</span><span class="kw">runSimulation</span>()</span>
+<span id="cb19-14"><a href="#cb19-14"></a><span class="co">#&gt; [1] TRUE</span></span>
+<span id="cb19-15"><a href="#cb19-15"></a>sim<span class="op">$</span><span class="kw">applySpeciationRates</span>(<span class="dt">speciation_rates =</span> <span class="kw">c</span>(<span class="fl">0.1</span>))</span>
+<span id="cb19-16"><a href="#cb19-16"></a>sim<span class="op">$</span><span class="kw">output</span>()</span></code></pre></div>
+</div>
+<div id="protracted-speciation" class="section level2">
+<h2>Protracted speciation</h2>
+<p>Point speciation, the method used by default here, does not perfectly represent speciation in nature. A more realistic portrayal is protracted speciation whereby speciation events do not occur instantaneously, instead requiring some number of generations to pass before incipients are regarded as distinct species. Protracted speciation provides a possible solution to many of the issues with neutral theory for producing more realistic biological patterns  and its inclusion here is thus a necessary feature.</p>
+<p>In the coalescence model, protracted speciation is equivalent to restricting speciation from occurring before a lineage is at least of some minimum age <span class="math inline">\(g_{min}\)</span>. At the other end of the scale, lineages which are millions of generations apart would presumably be separate species, providing an upper limit for the lifetime of a lineage <span class="math inline">\(g_{max}\)</span>. As such, we provide a method for supplying a maximum number of generations a species can exist within the protracted speciation parameters. Any lineages which are older than <span class="math inline">\(g_{max}\)</span>, which should typically be some very large number, immediately speciate. This feature is a novel idea providing a more general implementation of the speciation process and also can provide performance improvements by reducing the total number of generations that must be simulated. As <span class="math inline">\(g_{min} \to 0\)</span> and <span class="math inline">\(g_{max} \to \infty\)</span>, the dynamics would be equivalent to the classic point mutation speciation mode used in the earlier neutral models. Conversely, if <span class="math inline">\(g_{min} &gt; 0\)</span> and <span class="math inline">\(g_{max} \to \infty\)</span>, the implementation becomes equivalent to the protracted speciation mode used in  and . Finally, if <span class="math inline">\(g_{min} = g_{max}\)</span>, then all speciation occurs at a single lineage age.</p>
+<p>Below is the process of running a simulation with protracted speciation, and then applying alternative protracted speciation parameters post-simulation. Note that any minimum and maximum protracted speciation parameters applied post-simulation must be less than the initial minimum and maximum protracted speciation parameters, respectively, used during simulation. Our example uses an initial minimum lineage existence of 10 generations with a maximum of 1000. Post-simulation, we then apply a minimum of 5 generations with a maximum of 800.</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1"></a>sim <span class="op">=</span> Simulation()</span>
+<span id="cb20-2"><a href="#cb20-2"></a>sim.set_simulation_parameters(seed<span class="op">=</span><span class="dv">1</span>, </span>
+<span id="cb20-3"><a href="#cb20-3"></a>                              task<span class="op">=</span><span class="dv">1</span>, </span>
+<span id="cb20-4"><a href="#cb20-4"></a>                              output_directory<span class="op">=</span>output_dir, </span>
+<span id="cb20-5"><a href="#cb20-5"></a>                              min_speciation_rate<span class="op">=</span><span class="fl">0.1</span>, </span>
+<span id="cb20-6"><a href="#cb20-6"></a>                              deme<span class="op">=</span><span class="dv">10</span>, </span>
+<span id="cb20-7"><a href="#cb20-7"></a>                              sigma<span class="op">=</span><span class="dv">2</span>, </span>
+<span id="cb20-8"><a href="#cb20-8"></a>                              min_speciation_gen<span class="op">=</span><span class="fl">10.0</span>, </span>
+<span id="cb20-9"><a href="#cb20-9"></a>                              max_speciation_gen<span class="op">=</span><span class="fl">1000.0</span>)</span>
+<span id="cb20-10"><a href="#cb20-10"></a>sim.set_map_files(sample_map_file, fine_map_file)</span>
+<span id="cb20-11"><a href="#cb20-11"></a>sim.run()</span>
+<span id="cb20-12"><a href="#cb20-12"></a>c <span class="op">=</span> CoalescenceTree(sim)</span>
+<span id="cb20-13"><a href="#cb20-13"></a>c.set_speciation_parameters(speciation_rates<span class="op">=</span>[<span class="fl">0.1</span>, <span class="fl">0.2</span>])</span>
+<span id="cb20-14"><a href="#cb20-14"></a>c.add_protracted_parameters(min_speciation_gen<span class="op">=</span><span class="fl">5.0</span>, max_speciation_gen<span class="op">=</span><span class="fl">800.0</span>)</span>
+<span id="cb20-15"><a href="#cb20-15"></a>c.<span class="bu">apply</span>()</span></code></pre></div>
+<p>And in R as,</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1"></a>sim &lt;-<span class="st"> </span><span class="kw">ProtractedSpatialTreeSimulation</span>()</span>
+<span id="cb21-2"><a href="#cb21-2"></a>sim<span class="op">$</span><span class="kw">setSimulationParameters</span>(</span>
+<span id="cb21-3"><a href="#cb21-3"></a>  <span class="dt">task =</span> <span class="dv">1</span>,</span>
+<span id="cb21-4"><a href="#cb21-4"></a>  <span class="dt">seed =</span> <span class="dv">1</span>,</span>
+<span id="cb21-5"><a href="#cb21-5"></a>  <span class="dt">min_speciation_rate =</span> <span class="fl">0.1</span>,</span>
+<span id="cb21-6"><a href="#cb21-6"></a>  <span class="dt">deme =</span> <span class="dv">10</span>,</span>
+<span id="cb21-7"><a href="#cb21-7"></a>  <span class="dt">output_directory =</span> output_dir,</span>
+<span id="cb21-8"><a href="#cb21-8"></a>  <span class="dt">sample_mask_file =</span> sample_map_file,</span>
+<span id="cb21-9"><a href="#cb21-9"></a>  <span class="dt">fine_map_file =</span> fine_map_file,</span>
+<span id="cb21-10"><a href="#cb21-10"></a>  <span class="dt">sigma =</span> <span class="dv">2</span>,</span>
+<span id="cb21-11"><a href="#cb21-11"></a>  <span class="dt">min_speciation_gen =</span> <span class="fl">10.0</span>,</span>
+<span id="cb21-12"><a href="#cb21-12"></a>  <span class="dt">max_speciation_gen =</span> <span class="fl">1000.0</span></span>
+<span id="cb21-13"><a href="#cb21-13"></a>)</span>
+<span id="cb21-14"><a href="#cb21-14"></a>sim<span class="op">$</span><span class="kw">runSimulation</span>()</span>
+<span id="cb21-15"><a href="#cb21-15"></a><span class="co">#&gt; [1] TRUE</span></span>
+<span id="cb21-16"><a href="#cb21-16"></a>sim<span class="op">$</span><span class="kw">applySpeciationRates</span>(</span>
+<span id="cb21-17"><a href="#cb21-17"></a>  <span class="dt">speciation_rates =</span> <span class="kw">c</span>(<span class="fl">0.1</span>, <span class="fl">0.2</span>),</span>
+<span id="cb21-18"><a href="#cb21-18"></a>  <span class="dt">min_speciation_gens =</span> <span class="kw">c</span>(<span class="fl">5.0</span>),</span>
+<span id="cb21-19"><a href="#cb21-19"></a>  <span class="dt">max_speciation_gens =</span> <span class="kw">c</span>(<span class="fl">800.0</span>)</span>
+<span id="cb21-20"><a href="#cb21-20"></a>)</span>
+<span id="cb21-21"><a href="#cb21-21"></a>sim<span class="op">$</span><span class="kw">output</span>()</span></code></pre></div>
+</div>
+<div id="immigration-from-a-metacommunity" class="section level2">
+<h2>Immigration from a metacommunity</h2>
+<p>Both point mutation and protracted speciation represent the process of generating of a new species. In some situations, such as a mainland/island scenario, it may be desirable to instead use immigration from a larger metacommunity. In such cases, the probability that two immigration events generate different species is less than one. We implement this by replacing all speciation events with immigration from a metacommunity after a simulation has been completed. Every speciation event in the coalescence tree is detected and the species is identified by randomly drawing an individual from the metacommunity, effectively an immigration event.</p>
+<p>Generation of the metacommunity itself can be performed in one of three ways. Firstly, a non-spatial simulation of a defined size and speciation rate creates the metacommunity. Alternatively, an equivalent analytical solution for sampling metacommunities has been provided using analytical methods from  and . The default behavior is for a simulation to be run if there are fewer than 100000 individuals in the metacommunity, otherwise the analytical approximation is used. The final option is to provide a database from a completed simulation (or a user-generated database) which then acts as the metacommunity.</p>
+<p>Below we highlight how a metacommunity can be applied to a simulation that has previously been completed in the  object.</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1"></a>sim <span class="op">=</span> Simulation()</span>
+<span id="cb22-2"><a href="#cb22-2"></a>sim.set_simulation_parameters(seed<span class="op">=</span><span class="dv">1</span>, </span>
+<span id="cb22-3"><a href="#cb22-3"></a>                              task<span class="op">=</span><span class="dv">1</span>, </span>
+<span id="cb22-4"><a href="#cb22-4"></a>                              output_directory<span class="op">=</span>output_dir, </span>
+<span id="cb22-5"><a href="#cb22-5"></a>                              min_speciation_rate<span class="op">=</span><span class="fl">0.1</span>,</span>
+<span id="cb22-6"><a href="#cb22-6"></a>                              deme<span class="op">=</span><span class="dv">10</span>, </span>
+<span id="cb22-7"><a href="#cb22-7"></a>                              sigma<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb22-8"><a href="#cb22-8"></a>sim.set_map_files(sample_map_file, fine_map_file)</span>
+<span id="cb22-9"><a href="#cb22-9"></a>sim.run()</span>
+<span id="cb22-10"><a href="#cb22-10"></a>c <span class="op">=</span> CoalescenceTree(sim)</span>
+<span id="cb22-11"><a href="#cb22-11"></a>c.set_speciation_parameters(speciation_rates<span class="op">=</span>[<span class="fl">0.1</span>, <span class="fl">0.2</span>])</span>
+<span id="cb22-12"><a href="#cb22-12"></a>c.add_metacommunity_parameters(metacommunity_size<span class="op">=</span><span class="dv">10000</span>, </span>
+<span id="cb22-13"><a href="#cb22-13"></a>                               metacommunity_speciation_rate<span class="op">=</span><span class="fl">0.2</span>)</span>
+<span id="cb22-14"><a href="#cb22-14"></a>c.<span class="bu">apply</span>()</span></code></pre></div>
+<p>And the same for R,</p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1"></a>sim &lt;-<span class="st"> </span><span class="kw">SpatialTreeSimulation</span>()</span>
+<span id="cb23-2"><a href="#cb23-2"></a>sim<span class="op">$</span><span class="kw">setSimulationParameters</span>(</span>
+<span id="cb23-3"><a href="#cb23-3"></a>  <span class="dt">task =</span> <span class="dv">1</span>,</span>
+<span id="cb23-4"><a href="#cb23-4"></a>  <span class="dt">seed =</span> <span class="dv">1</span>,</span>
+<span id="cb23-5"><a href="#cb23-5"></a>  <span class="dt">min_speciation_rate =</span> <span class="fl">0.1</span>,</span>
+<span id="cb23-6"><a href="#cb23-6"></a>  <span class="dt">deme =</span> <span class="dv">10</span>,</span>
+<span id="cb23-7"><a href="#cb23-7"></a>  <span class="dt">output_directory =</span> output_dir,</span>
+<span id="cb23-8"><a href="#cb23-8"></a>  <span class="dt">sample_mask_file =</span> sample_map_file,</span>
+<span id="cb23-9"><a href="#cb23-9"></a>  <span class="dt">fine_map_file =</span> fine_map_file,</span>
+<span id="cb23-10"><a href="#cb23-10"></a>  <span class="dt">sigma =</span> <span class="dv">2</span></span>
+<span id="cb23-11"><a href="#cb23-11"></a>)</span>
+<span id="cb23-12"><a href="#cb23-12"></a>sim<span class="op">$</span><span class="kw">runSimulation</span>()</span>
+<span id="cb23-13"><a href="#cb23-13"></a><span class="co">#&gt; [1] TRUE</span></span>
+<span id="cb23-14"><a href="#cb23-14"></a>sim<span class="op">$</span><span class="kw">applySpeciationRates</span>(</span>
+<span id="cb23-15"><a href="#cb23-15"></a>  <span class="dt">speciation_rates =</span> <span class="kw">c</span>(<span class="fl">0.1</span>, <span class="fl">0.2</span>),</span>
+<span id="cb23-16"><a href="#cb23-16"></a>  <span class="dt">metacommunity_size =</span> <span class="dv">10000</span>,</span>
+<span id="cb23-17"><a href="#cb23-17"></a>  <span class="dt">metacommunity_speciation_rate =</span> <span class="fl">0.2</span></span>
+<span id="cb23-18"><a href="#cb23-18"></a>)</span>
+<span id="cb23-19"><a href="#cb23-19"></a>sim<span class="op">$</span><span class="kw">output</span>()</span></code></pre></div>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
