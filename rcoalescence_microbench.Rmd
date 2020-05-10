@@ -49,7 +49,6 @@ The microbenchmark code is provided at https://github.com/thompsonsed/pycoalesce
 - the number of simulated individuals increases
 - dispersal increases (except when dispersal is exceptionally small)
 - the landscape area increases
-- 
 
 
 

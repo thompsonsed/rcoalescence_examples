@@ -83,7 +83,7 @@ knitr::kable(community_parameters,
   caption = "Community parameters dataframe, as extracted from the simulation using \texttt{getCommunityReferences()}.",
   booktabs = TRUE
 ) %>%
-  kable_styling()
+  kable_styling(latex_options = c("hold_position"))
 ```
 
 ## Species abundance distributions
@@ -163,11 +163,11 @@ sad_plot
 
 
 
-## Species-area relationships
+## Species-area relationships (SARs)
 
-One method of calculating the species-area relationship involves first extracting the locations of each species, then counting the number of species within an increasingly large square. A few lines of code can accomplish this task. For simplicity, we are only looking at squares within the landscape which include at least one individual.
+One method of calculating the species-area relationship involves first extracting the locations of each species, then counting the number of species within an increasingly large square. It is worth noting that for landscapes which are not uniform, with heterogeneous density of individuals across space, there could be many ways of calculating the SAR, including using a circular region, normalising to the number of individuals or only counting areas which are entirely habitat. For simplicity, we are only looking at squares within the landscape, sampled at random ten times for each area.
 
-First, define some functions for calculating SARs.
+First, we define some functions for calculating SARs.
 
 ```{r}
 #' Calculates the richness of species within a given size in the
@@ -246,7 +246,7 @@ calculate_species_richness_all_areas <- function(df,
 ```
 
 
-Now, run the calculation for each speciation rate. This function takes around 30 seconds to a minute.
+Now we run the calculation for each speciation rate. This function takes around 30 seconds to a minute.
 
 ```{r}
 sar <- NULL
@@ -267,7 +267,6 @@ sar <- sar %>%
   )
 ```
 
-Show the results as a table.
 
 ```{r echo=FALSE}
 knitr::kable(sar %>% head(20),
@@ -275,12 +274,11 @@ knitr::kable(sar %>% head(20),
   booktabs = TRUE,
   longtable = TRUE
 ) %>%
-  kable_styling(latex_options = c("repeat_header"))
+  kable_styling(latex_options = c("repeat_header"), font_size = 7)
 ```
 
-And plot the SAR.
 
-```{r echo=FALSE, warning=FALSE, fig.fullwidth=TRUE, fig.width=6, fig.cap="Species-area relationships for each speciation rate."}
+```{r echo=FALSE, warning=FALSE, fig.fullwidth=TRUE, fig.width=6, fig.cap="Species-area relationships for each speciation rate from an example simulation. A total of 1000000 individuals were simulated arranged in a 1000x1000 cell landscape. The SAR was calculated by randomly drawing 10 areas of each size and calculating the number of species contained with the area. Shaded areas represent the extremes of species richness contained within the area and the solid line represents the mean species richness."}
 sar_plot <- sar %>%
   ggplot() +
   geom_ribbon(aes(

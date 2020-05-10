@@ -224,7 +224,7 @@ The community that most closely approximates the known sample is that with commu
 
 ## Species abundance distributions
 
-We use `getSpeciesLocations` to extract the locations of all individuals and then calculate the species abundance distributions for each island. The shapes 
+We use `getSpeciesLocations` to extract the locations of all individuals and then calculate the species abundance distributions for each island.
 
 ```{r}
 island_sads <- sim$getSpeciesLocations(sim$getCommunityReferences()$reference) %>%
