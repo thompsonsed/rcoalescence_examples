@@ -1,0 +1,67 @@
+---
+title: "A minimal rcoalescence example"
+author: "Sam Thompson"
+date: "`r Sys.Date()`"
+output: 
+  pdf_document: 
+    keep_tex: yes
+  rmarkdown::html_vignette:
+    code_folding: show
+vignette: >
+  %\VignetteIndexEntry{rcoalescence-vignette}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup, echo=FALSE}
+suppressPackageStartupMessages({
+  library(reticulate)
+})
+```
+
+Just a few lines of code are required to run the simulation, which was repeated 10 times with different random number seeds. In Python the minimal code is
+
+```{python eval=FALSE}
+sim = Simulation()
+s.set_simulation_parameters(seed=1, 
+                            task=1,
+                            output_directory="output",
+                            min_speciation_rate = 0.0001,
+                            sigma=2,
+                            deme=10,
+                            landscape_type="tiled_file",
+                            times=[x for x in range(0, 111, 5)])
+s.set_map_files("null", "future_landscape.tif")
+s.add_historical_map(fine_file="current_landscape.tif", 
+                     coarse_file="none", 
+                     time=99.9)
+s.run()
+```
+
+and equivalently, in R
+
+```{r eval=FALSE}
+sim <- SpatialTreeSimulation$new()
+sim$setSimulationParameters(
+  task = 1,
+  seed = 1,
+  output_directory = "output",
+  min_speciation_rate = 0.0001,
+  times_list = seq(0, 110, 5),
+  fine_map_file = "future_landscape.tif",
+  deme = 10,
+  historical_fine_map = "current_landscape.tif",
+  gen_since_historical = 99.9,
+  habitat_change_rate = 0.0,
+  sigma = 2,
+  landscape_type = "tiled_fine"
+)
+sim$runSimulation()
+```

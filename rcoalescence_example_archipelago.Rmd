@@ -152,7 +152,7 @@ sim$setSimulationParameters(
   seed = 2,
   min_speciation_rate = 0.000001,
   output_directory = output_dir,
-  dispersal_file = dispersal_file,
+  dispersal_map_file = dispersal_file,
   fine_map_file = density_file,
   uses_logging = FALSE
 )
@@ -199,7 +199,8 @@ best_community_reference <- sim$getCommunityReferences() %>%
 ```{r echo=FALSE}
 knitr::kable(species_island_A %>%
   left_join(sim$getCommunityReferences() %>%
-    rename(community_reference = reference)) %>%
+    rename(community_reference = reference),
+    by="community_reference") %>%
   select(
     community_reference,
     speciation_rate,

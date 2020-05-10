@@ -1,0 +1,327 @@
+---
+title: 'Calculating biodiversity metrics from rcoalescence simulations'
+author: "Sam Thompson"
+date: "10/05/2020"
+output: 
+  pdf_document: 
+    keep_tex: yes
+  rmarkdown::html_vignette:
+    code_folding: show
+vignette: >
+  %\VignetteIndexEntry{rcoalescence-estimating-biodiversity-loss}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup, echo=FALSE}
+suppressPackageStartupMessages({
+  library(rcoalescence)
+  library(tidyverse)
+  library(knitr)
+  library(kableExtra)
+  library(viridis)
+})
+```
+
+## Introduction
+
+In this vignette, we first run a small simulation and then demonstrate how some simple biodiversity metrics can be extracted using the in-built functions, or calculated in a few lines of R.
+
+First, we run a spatial simulation on a "null" landscape (with 1 in every cell) of dimensions 1000 by 1000 (or load the simulation if it already exists).
+
+```{r}
+# Path to the output database
+output_db <- file.path("output", paste0("data_", 1, "_", 1001, ".db"))
+sim <- SpatialTreeSimulation$new()
+sim$setSimulationParameters(
+  task = 1,
+  seed = 1001,
+  output_directory = "output",
+  min_speciation_rate = 0.0001,
+  fine_map_file = "null",
+  fine_map_x_size = 1000,
+  fine_map_y_size = 1000,
+  deme = 1,
+  sigma = 2,
+  landscape_type = "closed"
+)
+if (file.exists(output_db)) {
+  sim$setOutputDatabase(output_db)
+} else {
+  sim$runSimulation()
+  sim$applySpeciationRates(
+    speciation_rates = c(
+      0.0001,
+      0.001,
+      0.01,
+      0.1
+    ),
+    use_spatial = TRUE
+  )
+  sim$output()
+}
+```
+
+## Extracting the list of communities
+
+Each speciation rate applied to our simulation generates a different community. The community reference relates communities to the associated parameters and is extracted using `sim$getCommunityReferences()`. Often, it is useful to rename community_reference to reference to join with other tables.
+
+```{r}
+community_parameters <- sim$getCommunityReferences() %>%
+  rename(community_reference = reference)
+```
+
+```{r echo=FALSE}
+knitr::kable(community_parameters,
+  caption = "Community parameters dataframe, as extracted from the simulation using \texttt{getCommunityReferences()}.",
+  booktabs = TRUE
+) %>%
+  kable_styling()
+```
+
+## Species abundance distributions
+
+Using the `getSpeciesAbundances()` function and joining it to the community parameters (each speciation rate in this example), the
+species abundances distributions for each speciation rate can be extracted.
+
+```{r}
+species_abundances <- sim$getSpeciesAbundances(sim$getCommunityReferences()$reference) %>%
+  left_join(community_parameters,
+    by = "community_reference"
+  )
+```
+
+This produces the following dataframe.
+
+```{r echo=FALSE}
+knitr::kable(species_abundances %>% head(20),
+  caption = "Species abundances dataframe, as extracted from the simulation (first 20).",
+  booktabs = TRUE
+) %>%
+  kable_styling(font_size = 7)
+```
+
+The species abundances can be binned into log2 classes and then counted, so that the number of species within each bin is totalled. This provides the data necessary for \cite{Preston1960} plots.
+
+```{r}
+binned_species_abundances <- species_abundances %>%
+  filter(no_individuals > 0) %>%
+  mutate(log2_abundance = floor(log2(no_individuals))) %>%
+  group_by(
+    community_reference,
+    speciation_rate,
+    log2_abundance
+  ) %>%
+  summarise(no_species = n())
+```
+
+These species abundances distributions can now be plotted.
+
+```{r echo=FALSE, warning=FALSE, fig.fullwidth=TRUE, fig.width=6, fig.cap="Species abundance distributions for each community as Preston plots."}
+sad_plot <- binned_species_abundances %>%
+  ggplot() +
+  geom_line(aes(
+    x = log2_abundance, y = no_species,
+    colour = as.factor(speciation_rate),
+    linetype = as.factor(speciation_rate)
+  )) +
+  scale_x_continuous(expression(paste(
+    "Abundance class (",
+    log[2],
+    ")"
+  )),
+  trans = scales::log2_trans(),
+  labels = scales::trans_format(
+    "log2",
+    scales::math_format(.x)
+  )
+  ) +
+  scale_y_continuous("Number of species") +
+  scale_colour_brewer("Speciation\nrate",
+    palette = 2, type = "qual",
+    labels = scales::math_format(format = function(x) {
+      log10(as.numeric(x))
+    })
+  ) +
+  scale_linetype("Speciation\nrate",
+    labels = scales::math_format(format = function(x) {
+      log10(as.numeric(x))
+    })
+  ) +
+  theme_classic() +
+  theme(aspect.ratio = 0.7)
+sad_plot
+```
+
+
+
+
+## Species-area relationships
+
+One method of calculating the species-area relationship involves first extracting the locations of each species, then counting the number of species within an increasingly large square. A few lines of code can accomplish this task. For simplicity, we are only looking at squares within the landscape which include at least one individual.
+
+First, define some functions for calculating SARs.
+
+```{r}
+#' Calculates the richness of species within a given size in the
+#' landscape, counted in cells.
+#' Randomly samples from the landscape a number of times to get
+#' coordinates for calculating the area.
+#' Returns an array of species richness values
+calculate_richness_in_area <- function(df, a, sample_number) {
+  min_x <- min(df$x)
+  max_x <- max(df$x)
+  min_y <- min(df$y)
+  max_y <- max(df$y)
+
+  i <- 1
+  rand_xs <- sample(min_x:(max_x - a),
+    sample_number,
+    replace = TRUE
+  )
+  rand_ys <- sample(min_y:(max_y - a),
+    sample_number,
+    replace = TRUE
+  )
+  species_number <- vector("list", sample_number)
+
+  count_species <- function(i) {
+    x_ <- rand_xs[i]
+    y_ <- rand_ys[i]
+    no_species <- df %>%
+      filter(
+        x >= x_,
+        x < x_ + a,
+        y >= y_,
+        y < y_ + a,
+      ) %>%
+      select(species_id) %>%
+      distinct() %>%
+      count() %>%
+      pull()
+    return(no_species)
+  }
+  species_number <- lapply(seq(sample_number), count_species)
+  return(unlist(species_number))
+}
+
+#' Calculate the min, mean, max and lower and upper 25% values
+calculate_min_mean_max <- function(df, a, sample_number) {
+  species_richness <- calculate_richness_in_area(df,
+    a,
+    sample_number = sample_number
+  )
+  return(data.frame(
+    area = a,
+    min_richness = min(species_richness),
+    mean_richness = mean(species_richness),
+    max_richness = max(species_richness)
+  ))
+}
+
+#' Loop over a selection of possible sizes in the landscape
+calculate_species_richness_all_areas <- function(df,
+                                                 min_size = 10,
+                                                 interval = 50,
+                                                 sample_number = 100) {
+  max_size <- min(max(df$x) - min(df$x), max(df$y) - min(df$y))
+  output_richness <- bind_rows(lapply(seq(
+    min_size,
+    max_size,
+    interval
+  ),
+  calculate_min_mean_max,
+  df = df,
+  sample_number = sample_number
+  ))
+  return(output_richness)
+}
+```
+
+
+Now, run the calculation for each speciation rate. This function takes around 30 seconds to a minute.
+
+```{r}
+sar <- NULL
+for (ref in sim$getCommunityReferences()$reference) {
+  sar_tmp <- calculate_species_richness_all_areas(sim$getSpeciesLocations(ref),
+    sample_number = 10
+  ) %>%
+    mutate(reference = ref)
+  if (is.null(sar)) {
+    sar <- sar_tmp
+  } else {
+    sar <- sar %>% bind_rows(sar_tmp)
+  }
+}
+sar <- sar %>%
+  left_join(sim$getCommunityReferences(),
+    by = "reference"
+  )
+```
+
+Show the results as a table.
+
+```{r echo=FALSE}
+knitr::kable(sar %>% head(20),
+  caption = "Species richness as a function of area, summarised (top 20).",
+  booktabs = TRUE,
+  longtable = TRUE
+) %>%
+  kable_styling(latex_options = c("repeat_header"))
+```
+
+And plot the SAR.
+
+```{r echo=FALSE, warning=FALSE, fig.fullwidth=TRUE, fig.width=6, fig.cap="Species-area relationships for each speciation rate."}
+sar_plot <- sar %>%
+  ggplot() +
+  geom_ribbon(aes(
+    x = area,
+    ymin = min_richness,
+    max = max_richness,
+    fill = as.factor(speciation_rate)
+  ), alpha = 0.5) +
+  geom_line(aes(
+    x = area,
+    y = mean_richness,
+    colour = as.factor(speciation_rate),
+    linetype = as.factor(speciation_rate)
+  )) +
+  scale_x_continuous("Log10(Area)",
+    trans = "log10"
+  ) +
+  scale_y_continuous("Log10(number of species)",
+    trans = "log10",
+    labels = scales::math_format(format = function(x) {
+      log10(as.numeric(x))
+    })
+  ) +
+  scale_colour_brewer("Speciation\nrate",
+    palette = 2, type = "qual",
+    labels = scales::math_format(format = function(x) {
+      log10(as.numeric(x))
+    })
+  ) +
+  scale_fill_brewer("Speciation\nrate",
+    palette = 2, type = "qual",
+    labels = scales::math_format(format = function(x) {
+      log10(as.numeric(x))
+    })
+  ) +
+  scale_linetype("Speciation\nrate",
+    labels = scales::math_format(format = function(x) {
+      log10(as.numeric(x))
+    })
+  ) +
+  theme_classic() +
+  theme(aspect.ratio = 0.7)
+sar_plot
+```

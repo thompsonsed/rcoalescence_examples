@@ -171,7 +171,7 @@ sim$output()
 
 A dispersal matrix, stored as a map, is the alternative method of simulating dispersal within the simulation. Fig. \ref{fig:islands_diagram} indicates the process of transforming a landscape of connected islands into a matrix of dispersal probabilities. Dispersal probabilities are given as relative dispersal rates and transformed internally to a cumulative probability distribution across each row. A uniform random number from 0 to 1 is generated to pick the destination cell, which corresponds to one cell selected from the cumulative probability distribution. 
 
-\begin{figure}[h]
+\begin{figure}[p]
 	\centering
 	\includegraphics[scale=0.35]{islands_diagram.pdf}
 	\caption{a) Schematic of a system of four islands (\textbf{A}, \textbf{B}, \textbf{C} and \textbf{D}) with defined dispersal rates between each pair \(u_i, v_i, w_i, x_i, y_i\)and \(z_i, i \in {1, 2}\).  The dispersal probabilities are not necessarily equal in opposite directions, i.e. \(w_1 \ne w_2\). The probability of selection from within the same island is given by \(a, b, c\) and \(d\). b) Transformation of the island structure into a matrix of dispersal probabilities.}
