@@ -9,3 +9,5 @@ output
 figures
 .Rproj.user
 temp
+*.log
+*.aux

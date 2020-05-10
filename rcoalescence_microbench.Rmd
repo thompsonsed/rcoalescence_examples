@@ -76,6 +76,7 @@ microbench_df %>%
                 group=speciation_rate))+
     theme_classic() + 
   facet_grid(.~scale) + 
+  theme(aspect.ratio=1.2)+
   scale_x_continuous("Size of landscape (number of individuals)", 
                      trans="log2")+
   scale_y_continuous("Mean simulation time (seconds)", trans="log2")+
@@ -104,6 +105,7 @@ microbench_df %>%
             scale_x_log10("Speciation rate") + 
             scale_y_continuous("Mean simulation time (seconds)", trans="log2") + 
   theme_classic() + 
+  theme(aspect.ratio=1.2)+
   facet_grid(.~scale)+
   scale_colour_viridis("Size", option="magma", trans="log2", end=0.9) + 
   scale_fill_viridis("Size", option="magma", trans="log2", end=0.9)
