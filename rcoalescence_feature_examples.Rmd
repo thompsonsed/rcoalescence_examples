@@ -497,7 +497,7 @@ Both point mutation and protracted speciation represent the process of generatin
 
 Generation of the metacommunity itself can be performed in one of three ways. Firstly, a non-spatial simulation of a defined size and speciation rate creates the metacommunity. Alternatively, an equivalent analytical solution for sampling metacommunities has been provided using analytical methods from \cite{Vallade2003} and \cite{Alonso2004}. The default behavior is for a simulation to be run if there are fewer than 100000 individuals in the metacommunity, otherwise the analytical approximation is used. The final option is to provide a database from a completed simulation (or a user-generated database) which then acts as the metacommunity.
 
-Below we highlight how a metacommunity can be applied to a simulation that has previously been completed in the `sim object.
+Below we highlight how a metacommunity can be applied to a simulation that has previously been completed in the `sim` object.
 
 ```{python eval=F}
 sim = Simulation()
